@@ -5,22 +5,20 @@ name: .NET
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
+    - name: build & deploy
+      run: |
+        sudo systemctl stop kestrel-aapp.service
+        cd backend/kazan_peppers/BackendAdventureLeague
+        git pull --no-edit
+        sudo systemctl start kestrel-aapp.service
+        kill -INT 888
