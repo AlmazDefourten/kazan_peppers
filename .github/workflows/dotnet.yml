@@ -22,4 +22,3 @@ jobs:
         git stash
         git pull --no-edit
         sudo systemctl start kestrel-aapp.service
-        kill -INT 888
