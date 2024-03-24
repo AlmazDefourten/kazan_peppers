@@ -19,6 +19,7 @@ jobs:
       run: |
         sudo systemctl stop kestrel-aapp.service
         cd ~/backend/kazan_peppers/BackendAdventureLeague
+        git stash
         git pull --no-edit
         sudo systemctl start kestrel-aapp.service
         kill -INT 888
