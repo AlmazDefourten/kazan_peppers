@@ -153,6 +153,7 @@ UpgradeLog*.htm
 *.txt~
 *.swp
 *.swo
+yarn.lock
 
 # Temp files when opening LibreOffice on ubuntu
 .~lock.*
