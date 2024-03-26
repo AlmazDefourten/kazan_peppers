@@ -64,7 +64,7 @@
 
                   <b-form-checkbox v-model="model.rememberMe">Запомнить меня</b-form-checkbox>
                   <div class="text-center">
-                    <base-button type="primary" native-type="submit" class="my-4">Войти</base-button>
+                    <base-button @click="tryLogin" type="primary" native-type="submit" class="my-4">Войти</base-button>
                   </div>
                 </b-form>
               </validation-observer>
@@ -85,6 +85,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
@@ -100,6 +102,17 @@ export default {
       ]
     }
   },
+  methods: {
+    async tryLogin() {
+      axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
+      await axios.get("http://localhost:5183/weatherforecast")
+        .then(response => {
+          console.log(response);
+        }, error => {
+          console.log(error);
+        });
+    }
+  }
   // methods, computed properties, etc.
 }
 </script>
