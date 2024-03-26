@@ -18,7 +18,7 @@
           </stats-card>
         </b-col>
         <b-col xl="3" md="6">
-          <stats-card title="серега ровный пац1ан"
+          <stats-card title="серега ровный пац1а1н"
                       type="gradient-orange"
                       sub-title="2,356"
                       icon="ni ni-chart-pie-35"
