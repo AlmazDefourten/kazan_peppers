@@ -202,4 +202,5 @@
   .main-content .zoomOut {
     animation-name: zoomOut8;
   }
+
 </style>

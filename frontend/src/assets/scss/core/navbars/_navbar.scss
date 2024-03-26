@@ -17,7 +17,12 @@
 
             .nav-link-inner--text {
                 margin-left: .25rem;
+                color: black;
             }
+            .nav-link-inner--text:hover{
+              text-decoration: underline;
+            }
+
         }
     }
 

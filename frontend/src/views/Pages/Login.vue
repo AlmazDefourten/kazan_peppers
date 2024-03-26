@@ -30,7 +30,7 @@
               <validation-observer v-slot="{handleSubmit}" ref="formValidator">
                 <div class="text-center mt-2 mb-3"><h2><strong>Добро пожаловать</strong></h2></div>
                 <div class="text-center mt-2 mb-3">
-                  <b-form-radio-group id="btnradios1" v-model="selected" :options="options" buttons button-variant="outline-primary"></b-form-radio-group>
+                  <b-form-radio-group id="btnradios1" v-model="selected" :options="options" buttons button-variant="outline-secondary"></b-form-radio-group>
                 </div>
                 <b-form role="form" @submit.prevent="handleSubmit(onSubmit)">
 
