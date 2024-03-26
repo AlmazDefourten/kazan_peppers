@@ -5,7 +5,7 @@
       <!-- Card stats -->
       <b-row>
         <b-col xl="3" md="6">
-          <stats-card title="Total traffic"
+          <stats-card title="мои подпищеки"
                       type="gradient-red"
                       sub-title="350,897"
                       icon="ni ni-active-40"
