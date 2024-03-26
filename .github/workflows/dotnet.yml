@@ -22,3 +22,5 @@ jobs:
         git stash
         git pull --no-edit
         sudo systemctl start kestrel-aapp.service
+        sudo systemctl stop frontend.service
+        sudo systemctl start frontend.service
