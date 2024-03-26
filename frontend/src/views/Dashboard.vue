@@ -18,7 +18,7 @@
           </stats-card>
         </b-col>
         <b-col xl="3" md="6">
-          <stats-card title="аааа уыыы"
+          <stats-card title="аааа уssdsdыыы"
                       type="gradient-orange"
                       sub-title="2,356"
                       icon="ni ni-chart-pie-35"
