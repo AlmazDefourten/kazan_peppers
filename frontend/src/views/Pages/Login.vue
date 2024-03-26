@@ -105,7 +105,7 @@ export default {
   methods: {
     async tryLogin() {
       axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-      await axios.get("http://localhost:5183/weatherforecast")
+      await axios.get("http://107.173.25.219:81/weatherforecast")
         .then(response => {
           console.log(response);
         }, error => {
