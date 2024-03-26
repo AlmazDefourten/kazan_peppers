@@ -1,5 +1,5 @@
 <template>
-  <div class="main-content bg-default">
+  <div class="main-content bg-white">
     <base-nav
       v-model="showMenu"
       :transparent="true"
@@ -9,42 +9,51 @@
     >
       <div slot="brand" class="navbar-wrapper">
         <b-navbar-brand to="/">
-          <img src="img/brand/white.png">
+          <img src="img/brand/logo.png">
         </b-navbar-brand>
       </div>
 
      <template>
-       <div class="navbar-collapse-header">
-         <b-row>
-           <b-col cols="6" class="collapse-brand">
-             <router-link to="/">
-               <img src="img/brand/green.png">
-             </router-link>
-           </b-col>
-           <b-col cols="6" class="collapse-close">
-             <button type="button" class="navbar-toggler" @click="showMenu = false">
-               <span></span>
-               <span></span>
-             </button>
-           </b-col>
-         </b-row>
-       </div>
+<!--       <div class="navbar-collapse-header">-->
+<!--         <b-row>-->
+<!--           <b-col cols="6" class="collapse-brand">-->
+<!--             <router-link to="/">-->
+<!--               <img src="img/brand/green.png">-->
+<!--             </router-link>-->
+<!--           </b-col>-->
+<!--           <b-col cols="6" class="collapse-close">-->
+<!--             <button type="button" class="navbar-toggler" @click="showMenu = false">-->
+<!--               <span></span>-->
+<!--               <span></span>-->
+<!--             </button>-->
+<!--           </b-col>-->
+<!--         </b-row>-->
+<!--       </div>-->
+<!--       ПОМЕНЯТЬ ИКОНКИ-->
          <b-navbar-nav  class="align-items-lg-center ml-lg-auto">
-           <b-nav-item to="/dashboard">
-               <i class="ni ni-planet"></i>
-               <span class="nav-link-inner--text">Dashboard</span>
+           <b-nav-item href="https://sovcombank.ru/?utm_referrer=https%3A%2F%2Fonline.sovcombank.ru%2F">
+               <i class="ni"></i>
+               <span class="nav-link-inner--text">Частным лицам</span>
            </b-nav-item>
-           <b-nav-item to="/register">
-               <i class="ni ni-circle-08"></i>
-               <span class="nav-link-inner--text">Register</span>
+           <b-nav-item href="https://sovcombank.ru/business">
+               <i class="ni"></i>
+               <span class="nav-link-inner--text">Бизнесу</span>
            </b-nav-item>
-           <b-nav-item to="/login">
-               <i class="ni ni-key-25"></i>
-               <span class="nav-link-inner--text">Login</span>
+           <b-nav-item href="https://sovcombank.ru/corporate?type=kib">
+               <i class="ni"></i>
+               <span class="nav-link-inner--text">Корпорациям</span>
            </b-nav-item>
-           <b-nav-item to="/profile">
-               <i class="ni ni-single-02"></i>
-               <span class="nav-link-inner--text">Profile</span>
+           <b-nav-item href="https://sovcombank.ru/about/info">
+               <i class="ni"></i>
+               <span class="nav-link-inner--text">О банке</span>
+           </b-nav-item>
+           <b-nav-item href="https://sovcombank.ru/help">
+             <i class="ni"></i>
+             <span class="nav-link-inner--text">Помощь</span>
+           </b-nav-item>
+           <b-nav-item href="https://sovcombank.ru/office">
+             <i class="ni"></i>
+             <span class="nav-link-inner--text">Офисы и банкоматы</span>
            </b-nav-item>
        </b-navbar-nav>
      </template>

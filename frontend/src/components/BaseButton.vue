@@ -64,9 +64,18 @@ export default {
 </script>
 <style lang="scss">
   .base-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    background-color: #4682B4; /* Синий */
+    width: 100%; /* Размер как у поля ввода данных */
+    border: none;
+    color: white;
+    padding: 10px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+
 
     i {
       padding: 0 3px;
