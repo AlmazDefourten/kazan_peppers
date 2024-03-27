@@ -13,7 +13,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
+        builder.Entity<ApplicationUser>()
+            .HasIndex(u => u.Phone)
+            .IsUnique();
         base.OnModelCreating(builder);
     }
 }

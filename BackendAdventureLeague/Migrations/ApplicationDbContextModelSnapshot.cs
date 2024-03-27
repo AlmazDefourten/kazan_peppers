@@ -117,6 +117,9 @@ namespace BackendAdventureLeague.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
+                    b.HasIndex("Phone")
+                        .IsUnique();
+
                     b.ToTable("AspNetUsers", (string)null);
                 });
 

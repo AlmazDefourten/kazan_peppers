@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace BackendAdventureLeague.Endpoints.Authorization;
 
@@ -16,7 +17,7 @@ public static class AuthorizationEndpoints
     public static void AddCustomAuthorizationEndpoints(WebApplication app)
     {
         app.MapPost("/register", async Task<Results<Ok, ValidationProblem>>
-            ([FromBody] RegisterRequest registration, HttpContext context, [FromServices] IServiceProvider sp) =>
+            ([FromBody] CustomRegisterRequest registration, HttpContext context, [FromServices] IServiceProvider sp) =>
         {
             var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
 
@@ -32,6 +33,7 @@ public static class AuthorizationEndpoints
             var user = new ApplicationUser();
             await userStore.SetUserNameAsync(user, email, CancellationToken.None);
             await emailStore.SetEmailAsync(user, email, CancellationToken.None);
+            user.Phone = registration.Phone;
             var result = await userManager.CreateAsync(user, registration.Password);
 
             if (!result.Succeeded)
@@ -43,7 +45,7 @@ public static class AuthorizationEndpoints
         });
 
         app.MapPost("/login", async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>>
-            ([FromBody] LoginRequest login, [FromQuery] bool? useCookies, [FromQuery] bool? useSessionCookies, [FromServices] IServiceProvider sp) =>
+            ([FromBody] CustomLoginRequest login, [FromQuery] bool? useCookies, [FromQuery] bool? useSessionCookies, [FromServices] IServiceProvider sp) =>
         {
             var signInManager = sp.GetRequiredService<SignInManager<ApplicationUser>>();
 
@@ -51,7 +53,25 @@ public static class AuthorizationEndpoints
             var isPersistent = (useCookies == true) && (useSessionCookies != true);
             signInManager.AuthenticationScheme = useCookieScheme ? IdentityConstants.ApplicationScheme : IdentityConstants.BearerScheme;
 
-            var result = await signInManager.PasswordSignInAsync(login.Email, login.Password, isPersistent, lockoutOnFailure: true);
+            SignInResult? result = null;
+            if (!string.IsNullOrEmpty(login.Email))
+                result = await signInManager.PasswordSignInAsync(login.Email, login.Password, isPersistent, lockoutOnFailure: true);
+            else if (!string.IsNullOrEmpty(login.Phone))
+            {
+                var user = signInManager.UserManager.Users.First(user => user.Phone == login.Phone);
+                if (user.Email != null)
+                    result = await signInManager.PasswordSignInAsync(user.Email, login.Password, isPersistent,
+                        lockoutOnFailure: true);
+                else
+                {
+                    return TypedResults.Problem("Неверный логин или пароль", statusCode: StatusCodes.Status401Unauthorized);
+                }
+            }
+
+            if (result == null)
+            {
+                return TypedResults.Problem("Неверный логин или пароль", statusCode: StatusCodes.Status401Unauthorized);
+            }
 
             if (result.RequiresTwoFactor)
             {
@@ -102,4 +122,52 @@ public static class AuthorizationEndpoints
 
         return TypedResults.ValidationProblem(errorDictionary);
     }
+}
+
+/// <summary>
+/// The request type for the "/login" endpoint added by <see cref="IdentityApiEndpointRouteBuilderExtensions.MapIdentityApi"/>.
+/// </summary>
+public sealed class CustomLoginRequest
+{
+    /// <summary>
+    /// The user's email address which acts as a user name.
+    /// </summary>
+    public string Email { get; init; }
+    
+    /// <summary>
+    /// The user's phone
+    /// </summary>
+    public string Phone { get; init; }
+
+    /// <summary>
+    /// The user's password.
+    /// </summary>
+    public required string Password { get; init; }
+
+    /// <summary>
+    /// The optional two-factor authenticator code. This may be required for users who have enabled two-factor authentication.
+    /// This is not required if a <see cref="TwoFactorRecoveryCode"/> is sent.
+    /// </summary>
+    public string? TwoFactorCode { get; init; }
+
+    /// <summary>
+    /// An optional two-factor recovery code from <see cref="TwoFactorResponse.RecoveryCodes"/>.
+    /// This is required for users who have enabled two-factor authentication but lost access to their <see cref="TwoFactorCode"/>.
+    /// </summary>
+    public string? TwoFactorRecoveryCode { get; init; }
+}
+
+public sealed class CustomRegisterRequest
+{
+    /// <summary>
+    /// The user's email address which acts as a user name.
+    /// </summary>
+    public required string Email { get; init; }
+    
+    public required string Phone { get; init; }
+
+    /// <summary>
+    /// The user's password.
+    /// </summary>
+    public required string Password { get; init; }
 }
