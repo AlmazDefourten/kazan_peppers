@@ -1,3 +1,7 @@
+using BackendAdventureLeague.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +9,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
+builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
+{
+    options.UseNpgsql("Server=localhost;Port=5432;Database=backend;User Id=postgres;Password=123654gg;");
+});
+
+builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+
+builder.Services.AddAuthentication()
+                .AddBearerToken(IdentityConstants.BearerScheme);
+
+builder.Services.AddAuthorizationBuilder();
+
+builder.Services.AddIdentityCore<ApplicationUser>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddApiEndpoints();
+
+builder.Services.AddSingleton(TimeProvider.System);
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -18,6 +42,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors(x => x
     .AllowAnyMethod()
     .AllowAnyHeader()
+    .SetIsOriginAllowedToAllowWildcardSubdomains()
     .SetIsOriginAllowed(origin => true) // allow any origin
     .AllowCredentials()); // allow credentials
 
@@ -42,6 +67,13 @@ app.MapGet("/weatherforecast", () =>
     })
     .WithName("GetWeatherForecast")
     .WithOpenApi();
+
+app.MapIdentityApi<ApplicationUser>();
+
+using var scope = app.Services.CreateScope();
+
+var context = scope.ServiceProvider.GetService<ApplicationDbContext>();
+await context?.Database.MigrateAsync()!;
 
 app.Run();
 
