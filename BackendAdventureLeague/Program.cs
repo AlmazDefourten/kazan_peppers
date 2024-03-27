@@ -1,5 +1,10 @@
+using BackendAdventureLeague.Endpoints.Authorization;
 using BackendAdventureLeague.Models;
+using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -76,7 +81,7 @@ app.MapGet("/weatherforecast", () =>
     .WithName("GetWeatherForecast")
     .WithOpenApi();
 
-app.MapIdentityApi<ApplicationUser>();
+AuthorizationEndpoints.AddCustomAuthorizationEndpoints(app);
 
 using var scope = app.Services.CreateScope();
 
