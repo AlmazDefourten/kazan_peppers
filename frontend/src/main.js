@@ -20,8 +20,38 @@ import App from './App.vue';
 
 // router setup
 import router from './routes/router';
+import { extend } from 'vee-validate';
+import {required, min, confirmed, regex, email} from "vee-validate/dist/rules";
 // plugin setup
 Vue.use(DashboardPlugin);
+
+extend('required', {
+  ...required,
+  message: 'Это поле обязательно для заполнения'
+});
+
+extend('min', {
+  ...min,
+  message: 'Минимальная длина поля должна быть не менее {length} символов'
+});
+
+extend('passconfirmed', {
+  ...confirmed,
+  message: 'Пароли не совпадают'
+});
+
+extend('email', {
+  ...email,
+  message: 'Неверный формат почты'
+});
+
+extend('phone', {
+  ...regex,
+  validate: value => {
+    return /^(\+7|7|8)?[\s]?\(?[489][0-9]{2}\)?[\s]?[0-9]{3}[\s]?[0-9]{2}[\s]?[0-9]{2}$/.test(value);
+  },
+  message: 'Неверный формат телефонного номера'
+});
 
 /* eslint-disable no-new */
 new Vue({

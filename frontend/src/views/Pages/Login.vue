@@ -32,9 +32,9 @@
                 <div class="text-center mt-2 mb-3">
                   <b-form-radio-group id="btnradios1" v-model="selected" :options="options" buttons button-variant="outline-secondary"></b-form-radio-group>
                 </div>
-                <b-form role="form" @submit.prevent="handleSubmit(onSubmit)">
+                <b-form role="form">
 
-                  <base-input v-if="selected === 'Email'" alternative
+                  <base-input v-if="selected === 'email'" alternative
                               class="mb-3"
                               name="Email"
                               :rules="{required: true, email: true}"
@@ -64,7 +64,7 @@
 
                   <b-form-checkbox v-model="model.rememberMe">Запомнить меня</b-form-checkbox>
                   <div class="text-center">
-                    <base-button @click="tryLogin" type="primary" native-type="submit" class="my-4">Войти</base-button>
+                    <base-button @click="handleSubmit(tryLogin)" type="primary" native-type="submit" class="my-4">Войти</base-button>
                   </div>
                 </b-form>
               </validation-observer>
@@ -91,23 +91,24 @@ export default {
   data() {
     return {
       model: {
-        email: '',
+        email: undefined,
         password: '',
+        phone: '',
         rememberMe: false
       },
       selected: 'Email',
       options: [
-        { text: 'Email', value: 'Email' },
-        { text: 'Телефон', value: 'Телефон' }
+        { text: 'Email', value: 'email' },
+        { text: 'Телефон', value: 'phone' }
       ]
     }
   },
   methods: {
     async tryLogin() {
-      axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-      await axios.get("http://107.173.25.219:81/weatherforecast")
+      axios.post("http://107.173.25.219:81/login", this.model)
         .then(response => {
-          console.log(response);
+          localStorage.setItem("accessToken", response.data.accessToken);
+          window.location = window.location.protocol + "//" + window.location.host;
         }, error => {
           console.log(error);
         });

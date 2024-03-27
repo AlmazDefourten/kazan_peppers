@@ -31,7 +31,7 @@
                 <small>Введите все обязательные поля</small>
               </div>
               <validation-observer v-slot="{handleSubmit}" ref="formValidator">
-                <b-form role="form" @submit.prevent="handleSubmit(onSubmit)">
+                <b-form role="form">
                   <base-input alternative
                               class="mb-3"
                               prepend-icon="ni ni-email-83"
@@ -45,7 +45,7 @@
                               prepend-icon="ni ni-mobile-button"
                               placeholder="Телефон"
                               name="Phone"
-                              :rules="{required: true}"
+                              :rules="{required: true, phone: true}"
                               v-model="model.phone">
                   </base-input>
                   <base-input alternative
@@ -54,7 +54,7 @@
                               placeholder="Пароль"
                               type="password"
                               name="Password"
-                              :rules="{required: true, min: 6}"
+                              :rules="{required: true, min: 6 }"
                               v-model="model.password">
                   </base-input>
                   <base-input alternative
@@ -63,7 +63,7 @@
                               placeholder="Подтверждение пароля"
                               type="password"
                               name="Confirm Password"
-                              :rules="{required: true, min: 6}"
+                              :rules="{required: true, min: 6, passconfirmed: model.password !== model.confirmPassword }"
                               v-model="model.confirmPassword">
                   </base-input>
                   <b-row class=" my-4">
@@ -75,9 +75,7 @@
                       </base-input>
                     </b-col>
                   </b-row>
-                  <div class="text-center">
-                    <base-button type="submit" variant="primary" class="mt-4">Создать аккаунт</base-button>
-                  </div>
+                    <base-button type="submit" @click="handleSubmit(onSubmit)" variant="primary" class="mt-4">Создать аккаунт</base-button>
                 </b-form>
               </validation-observer>
             </b-card-body>
@@ -89,6 +87,8 @@
 </template>
 <script>
 
+  import axios from "axios";
+
   export default {
     name: 'register',
     data() {
@@ -97,16 +97,21 @@
           name: '',
           email: '',
           password: '',
+          confirmPassword: '',
           agree: false
         }
       }
     },
     methods: {
       onSubmit() {
-        // this will be called only after form is valid. You can do an api call here to register users
+        axios.post("http://107.173.25.219:81/register", this.model)
+          .then(response => {
+            console.log(response.data);
+          }, error => {
+            console.log(error);
+          });
       }
     }
-
   };
 </script>
 <style scoped>
