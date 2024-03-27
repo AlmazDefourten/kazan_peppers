@@ -79,6 +79,7 @@ app.MapGet("/weatherforecast", () =>
         return forecast;
     })
     .WithName("GetWeatherForecast")
+    .RequireAuthorization()
     .WithOpenApi();
 
 AuthorizationEndpoints.AddCustomAuthorizationEndpoints(app);
