@@ -8,5 +8,6 @@ public class Account
 
     public string Name { get; set; } = "";
 
+    public CurrencyTypes CurrencyType { get; set; }
     public ApplicationUser User { get; set; }
 }
