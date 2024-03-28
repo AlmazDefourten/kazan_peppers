@@ -157,7 +157,7 @@ export default {
 .custom-class {
   color: black;
   font-size: 14px; /* Установите желаемый размер шрифта */
-  line-height: 1;
+  white-space: nowrap; /* в одну строчку текст */
 }
 .custom-class:hover{
   text-decoration: underline;
@@ -167,6 +167,8 @@ export default {
   margin-right: 1px; /* Это добавит отступ справа от изображения */
   margin-left: 1px;
 }
-
+.nav-link {
+  display: flex; /* прямой текст */
+}
 
 </style>
