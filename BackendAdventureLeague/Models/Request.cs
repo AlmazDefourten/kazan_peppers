@@ -1,12 +1,12 @@
 ﻿namespace BackendAdventureLeague.Models;
 
-public class Account
+public class Request
 {
     public long Id { get; set; }
-    
-    public decimal Sum { get; set; }
 
-    public string Name { get; set; } = "";
+    public DateTime ExpirationTime { get; set; }
+
+    public decimal AmountToBuy { get; set; }
 
     public ApplicationUser User { get; set; }
 }

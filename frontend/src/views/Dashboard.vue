@@ -5,13 +5,29 @@
     <div class="pb-5 pt-5 pt-md-8 h-100" ref="tradingviewContainer">
     </div>
 
+    <div>
+      <b-dropdown id="dropdown-1" text="Заявка на покупку по определенной цене" class="m-md-2">
+        <b-dropdown-item>Рубли</b-dropdown-item>
+        <b-dropdown-item>Юани</b-dropdown-item>
+        <b-dropdown-item>Дирхамы</b-dropdown-item>
+      </b-dropdown>
+      <div>
+        <!-- Using modifiers -->
+        <b-button v-b-toggle.collapse-2 class="m-1">Toggle Collapse</b-button>
+
+        <!-- Element to collapse -->
+        <b-collapse id="collapse-2">
+          <b-card>  Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.</b-card>
+        </b-collapse>
+      </div>
+
+
+    </div>
   </div>
 </template>
 <script>
   // Charts
   import * as chartConfigs from '@/components/Charts/config';
-  import LineChart from '@/components/Charts/LineChart';
-  import BarChart from '@/components/Charts/BarChart';
 
   // Components
   import BaseProgress from '@/components/BaseProgress';
@@ -20,39 +36,14 @@
   // Tables
   import SocialTrafficTable from './Dashboard/SocialTrafficTable';
   import PageVisitsTable from './Dashboard/PageVisitsTable';
+  import axios from "axios";
 
   export default {
     components: {
     },
     data() {
       return {
-        bigLineChart: {
-          allData: [
-            [0, 20, 10, 30, 15, 40, 20, 60, 60],
-            [0, 20, 5, 25, 10, 30, 15, 40, 40]
-          ],
-          activeIndex: 0,
-          chartData: {
-            datasets: [
-              {
-                label: 'Performance',
-                data: [0, 20, 10, 30, 15, 40, 20, 60, 60],
-              }
-            ],
-            labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-          },
-          extraOptions: chartConfigs.blueChartOptions,
-        },
-        redBarChart: {
-          chartData: {
-            labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            datasets: [{
-              label: 'Sales',
-              data: [25, 20, 30, 22, 17, 29]
-            }]
-          },
-          extraOptions: chartConfigs.blueChartOptions
-        }
+        accounts: [],
       };
     },
     methods: {
@@ -70,7 +61,7 @@
         this.bigLineChart.activeIndex = index;
       }
     },
-    mounted() {
+    async mounted() {
       const script = document.createElement('script');
       script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
       script.async = true;
@@ -90,6 +81,14 @@
         "support_host": "https://www.tradingview.com"
       });
       this.$refs.tradingviewContainer.appendChild(script);
+
+      this.accounts = await axios.post("http://107.173.25.219:81/account/list", this.model)
+        .then(response => {
+          localStorage.setItem("accessToken", response.data.accessToken);
+          window.location = window.location.protocol + "//" + window.location.host;
+        }, error => {
+          console.log(error);
+        });
     },
   };
 </script>

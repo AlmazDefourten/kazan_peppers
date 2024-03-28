@@ -1,10 +1,8 @@
-using BackendAdventureLeague.Endpoints.Authorization;
+using BackendAdventureLeague;
+using BackendAdventureLeague.Endpoints.Account;
+using BackendAdventureLeague.Endpoints.Request;
 using BackendAdventureLeague.Models;
-using Microsoft.AspNetCore.Authentication.BearerToken;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +39,9 @@ builder.Services.AddIdentityCore<ApplicationUser>()
 
 builder.Services.AddSingleton(TimeProvider.System);
 
+builder.Services.AddTransient<IAccountCrudEndpoints, AccountCrudEndpoints>();
+builder.Services.AddTransient<IRequestService, RequestsService>();
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -61,28 +62,7 @@ app.UseCors(x => x
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 0),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast")
-    .RequireAuthorization()
-    .WithOpenApi();
-
-AuthorizationEndpoints.AddCustomAuthorizationEndpoints(app);
+MapMinimalApi.DoMap(app);
 
 using var scope = app.Services.CreateScope();
 

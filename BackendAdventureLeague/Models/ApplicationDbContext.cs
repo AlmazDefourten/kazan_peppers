@@ -9,6 +9,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
     public DbSet<Account> Accounts => Set<Account>();
+    
+    public DbSet<Request> Requests => Set<Request>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -22,6 +24,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
 public interface IApplicationDbContext
 {
     DbSet<Account> Accounts { get; }
+    
+    DbSet<Request> Requests { get; }
+
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
