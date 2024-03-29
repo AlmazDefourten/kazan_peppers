@@ -108,7 +108,9 @@ export default {
       axios.post("http://107.173.25.219:81/login", this.model)
         .then(response => {
           localStorage.setItem("accessToken", response.data.accessToken);
-          window.location = window.location.protocol + "//" + window.location.host;
+          if (response.status === 200) {
+            window.location = window.location.protocol + "//" + window.location.host + "/#/dashboard";
+          }
         }, error => {
           console.log(error);
         });
