@@ -1,4 +1,6 @@
 ﻿using BackendAdventureLeague.Models;
+using BackendAdventureLeague.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,12 +41,38 @@ public class AccountCrudEndpoints(IApplicationDbContext context, IHttpContextAcc
     
     public async Task TransferAsync(long idFrom, long idTo, decimal sum, CancellationToken cancellationToken = default)
     {
-        var from = context.Accounts.FindAsync(idFrom);
-        var to = context.Accounts.FindAsync(idTo);
+        var from = await context.Accounts.FindAsync(idFrom);
+        var to = await context.Accounts.FindAsync(idTo);
+
+        if (from.Sum < sum | from.CurrencyType == to.CurrencyType)
+        {
+            return;
+        }
         
+        from.Sum -= sum;
+
+        if (from.CurrencyType == CurrencyTypes.Ruble)
+        {
+            var coef = to.CurrencyType == CurrencyTypes.Dirham
+                ? CurrencyService.DyrhamCourse
+                : CurrencyService.YuanCourse;
+
+            var convertedSum = sum / coef;
+            
+            to.Sum += convertedSum;
+        }
+        else
+        {
+            var coef = to.CurrencyType == CurrencyTypes.Dirham
+                ? CurrencyService.DyrhamCourse
+                : CurrencyService.YuanCourse;
+
+            var convertedSum = sum * coef;
+            
+            to.Sum += convertedSum;
+        }
+
         
-        
-        context.Accounts.Remove(await context.Accounts.FindAsync(1));
         await context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -9,4 +9,6 @@ public interface IAccountCrudEndpoints
     Task<Models.Account?> GetAsync(long id, CancellationToken cancellationToken = default);
 
     Task DeleteAsync(long id, CancellationToken cancellationToken = default);
+
+    Task TransferAsync(long idFrom, long idTo, decimal sum, CancellationToken cancellationToken = default);
 }

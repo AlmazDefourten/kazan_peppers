@@ -2,8 +2,12 @@ using BackendAdventureLeague;
 using BackendAdventureLeague.Endpoints.Account;
 using BackendAdventureLeague.Endpoints.Request;
 using BackendAdventureLeague.Models;
+using BackendAdventureLeague.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
+var a = new CurrencyService();
+a.GetCurrency(CurrencyTypes.Yuan);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +42,8 @@ builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddApiEndpoints();
 
 builder.Services.AddSingleton(TimeProvider.System);
+
+builder.Services.AddSingleton<ICurrencyService, CurrencyService>();
 
 builder.Services.AddTransient<IAccountCrudEndpoints, AccountCrudEndpoints>();
 builder.Services.AddTransient<IRequestService, RequestsService>();
