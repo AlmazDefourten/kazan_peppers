@@ -9,6 +9,8 @@ public class Request
     public decimal AmountToBuy { get; set; }
     
     public CurrencyTypes CurrencyType { get; set; }
+    
+    public Account Account { get; set; }
 
     public ApplicationUser User { get; set; }
 }
