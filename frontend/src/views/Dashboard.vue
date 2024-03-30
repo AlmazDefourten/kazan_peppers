@@ -83,6 +83,7 @@
   import axios from "axios";
   import NewAccount from "./NewAccount.vue";
   import '@mdi/font/css/materialdesignicons.css';
+  import {ApiAddress} from "@/common.ts";
 
   export default {
     components: {
@@ -127,7 +128,7 @@
       this.$refs.tradingviewContainer.appendChild(script);
     },
     async beforeMount() {
-      await axios.get("http://107.173.25.219:81/account/list")
+      await axios.get(ApiAddress + "/account/list")
         .then(response => {
           this.accounts = response.data;
           console.log(response.data);

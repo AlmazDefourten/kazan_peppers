@@ -86,8 +86,8 @@
   </div>
 </template>
 <script>
-
   import axios from "axios";
+  import {ApiAddress} from "@/common.ts";
 
   export default {
     name: 'register',
@@ -104,10 +104,14 @@
     },
     methods: {
       onSubmit() {
-        axios.post("http://107.173.25.219:81/register", this.model)
+        axios.post(ApiAddress + "/register", this.model)
           .then(response => {
+            localStorage.removeItem("accessToken");
+            window.location = window.location.protocol + "" + window.location.host + "/#/login"
+            this.$notify({type: "success", icon: "mdi mdi-check-bold", verticalAlign: 'top', horizontalAlign: 'right', message: 'Вы успешно зарегестрировлись'});
             console.log(response.data);
           }, error => {
+            this.$notify({type: "danger", icon: "mdi mdi-remove", verticalAlign: 'top', horizontalAlign: 'right', message: 'Не удалось создать аккаунт'});
             console.log(error);
           });
       }

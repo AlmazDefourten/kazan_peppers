@@ -64,7 +64,7 @@
 
                   <b-form-checkbox v-model="model.rememberMe">Запомнить меня</b-form-checkbox>
                   <div class="text-center">
-                    <base-button @click="handleSubmit(tryLogin)" type="primary" native-type="submit" class="my-4">Войти</base-button>
+                    <base-button @click="handleSubmit(tryLogin)" type="primary" class="my-4">Войти</base-button>
                   </div>
                 </b-form>
               </validation-observer>
@@ -86,6 +86,7 @@
 
 <script>
 import axios from "axios";
+import {ApiAddress} from "@/common.ts";
 
 export default {
   data() {
@@ -105,10 +106,11 @@ export default {
   },
   methods: {
     async tryLogin() {
-      axios.post("http://107.173.25.219:81/login", this.model)
+      axios.post(ApiAddress + "/login", this.model)
         .then(response => {
-          localStorage.setItem("accessToken", response.data.accessToken);
+          localStorage.removeItem("accessToken");
           if (response.status === 200) {
+            localStorage.setItem("accessToken", response.data.accessToken);
             window.location = window.location.protocol + "//" + window.location.host + "/#/dashboard";
           }
         }, error => {

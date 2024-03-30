@@ -1,6 +1,7 @@
 <script>
 
 import axios from "axios";
+import {ApiAddress} from "@/common.ts";
 
 export default {
   data() {
@@ -14,12 +15,12 @@ export default {
   },
   methods: {
     async createAccount() {
-      axios.post("http://107.173.25.219:81/account/create", this.model)
+      axios.post(ApiAddress + "/account/create", this.model)
         .then(response => {
           this.$emit('close');
           this.$notify({type: "success", icon: "mdi mdi-check-bold", verticalAlign: 'top', horizontalAlign: 'right', message: 'Счет успешно создан'});
         }, error => {
-          this.$notify({type: "danger", icon: "mdi mdi-remove", verticalAlign: 'top', horizontalAlign: 'right', message: 'Не удалось создать акаунт'});
+          this.$notify({type: "danger", icon: "mdi mdi-remove", verticalAlign: 'top', horizontalAlign: 'right', message: 'Не удалось создать счет'});
           console.log(error);
         });
     },

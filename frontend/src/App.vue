@@ -21,11 +21,12 @@ axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
  }, (error) => {
    console.log(error);
    if (error.message == "Network Error") {
-     window.location = window.location.protocol + "" + window.location.host + "/#/login"
+     window.location = window.location.protocol + "" + "/#/login"
    } else {
      return Promise.reject(error);
    }
  });
+
 export default {
   components: {Notifications}
 }
