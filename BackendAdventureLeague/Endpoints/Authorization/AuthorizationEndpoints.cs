@@ -14,7 +14,7 @@ public static class AuthorizationEndpoints
 {
     private static readonly EmailAddressAttribute EmailAddressAttribute = new();
 
-    public static void AddCustomAuthorizationEndpoints(WebApplication app, IApplicationDbContext dbContext)
+    public static void AddCustomAuthorizationEndpoints(WebApplication app)
     {
         app.MapPost("/register", async Task<Results<Ok, ValidationProblem>>
             ([FromBody] CustomRegisterRequest registration, HttpContext context, [FromServices] IServiceProvider sp) =>
@@ -48,9 +48,16 @@ public static class AuthorizationEndpoints
                 Name = "Основной",
                 User = user
             };
-            dbContext.Accounts.Add(mainAccount);
+            
+            using (var scope = app.Services.CreateScope()) {
+                var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
 
-            await dbContext.SaveChangesAsync();
+                dbContext.Accounts.Add(mainAccount);
+
+                await dbContext.SaveChangesAsync();
+            }
+            
+            
 
             return TypedResults.Ok();
         });

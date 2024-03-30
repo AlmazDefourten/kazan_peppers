@@ -46,8 +46,6 @@ public static class MapMinimalApi
             .RequireAuthorization()
             .WithOpenApi();
 
-        var dbContext = app.Services.GetService<IApplicationDbContext>();
-
-        AuthorizationEndpoints.AddCustomAuthorizationEndpoints(app, dbContext);
+        AuthorizationEndpoints.AddCustomAuthorizationEndpoints(app);
     }
 }
