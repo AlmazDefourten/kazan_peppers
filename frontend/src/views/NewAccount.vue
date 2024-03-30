@@ -16,6 +16,7 @@ export default {
     async createAccount() {
       axios.post("http://107.173.25.219:81/account/create", this.model)
         .then(response => {
+          this.$emit('close');
         }, error => {
           console.log(error);
         });

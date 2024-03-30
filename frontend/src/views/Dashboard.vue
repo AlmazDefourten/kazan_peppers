@@ -28,7 +28,6 @@
               <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100">
                 <i class="mdi mdi-swap-horizontal"></i>
               </base-button>
-
             </template>
           </stats-card>
         </b-collapse>
@@ -37,19 +36,19 @@
           <b-dropdown-item v-b-modal.modal-2>Юани</b-dropdown-item>
           <b-dropdown-item v-b-modal.modal-3>Дирхамы</b-dropdown-item>
         </b-dropdown>
-        <b-modal :hide-footer="true" id="modal-1" title="Открытие нового счета в рублях">
+        <b-modal ref="modal1" :hide-footer="true" id="modal-1" title="Открытие нового счета в рублях">
           <template slot="default">
-            <new-account :currency-type="1"> </new-account>
+            <new-account @close="() => { this.$refs.modal1.hide(); }" :currency-type="1"> </new-account>
           </template>
         </b-modal>
-        <b-modal :hide-footer="true" id="modal-2" title="Открытие нового счета в юанях">
+        <b-modal ref="modal2" :hide-footer="true" id="modal-2" title="Открытие нового счета в юанях">
           <template slot="default">
-            <new-account :currency-type="2"> </new-account>
+            <new-account @close="() => { this.$refs.modal2.hide(); }" :currency-type="2"> </new-account>
           </template>
         </b-modal>
-        <b-modal :hide-footer="true" id="modal-3" title="Открытие нового счета в дирхамах">
+        <b-modal ref="modal3" :hide-footer="true" id="modal-3" title="Открытие нового счета в дирхамах">
           <template slot="default">
-            <new-account :currency-type="3"> </new-account>
+            <new-account @close="() => { this.$refs.modal3.hide(); }" :currency-type="3"> </new-account>
           </template>
         </b-modal>
       </div>
@@ -67,7 +66,7 @@
     },
     data() {
       return {
-        accounts: [0, 1]
+        accounts: [0, 1],
       };
     },
     methods: {
