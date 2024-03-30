@@ -18,7 +18,19 @@
 
         <!-- Element to collapse -->
         <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-2">
-          <b-card v-text="data.name"></b-card>
+          <stats-card :title="data.name"
+                      type="gradient-info"
+                      :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
+                      class="mb-4 w-25"
+                      style="min-width: 300px"
+          >
+            <template slot="icon">
+              <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100">
+                <i class="mdi mdi-swap-horizontal"></i>
+              </base-button>
+
+            </template>
+          </stats-card>
         </b-collapse>
         <b-dropdown id="dropdown-1" text="+" class="m-md-2">
           <b-dropdown-item v-b-modal.modal-1>Рубли</b-dropdown-item>
@@ -45,19 +57,9 @@
   </div>
 </template>
 <script>
-  // Charts
-  import * as chartConfigs from '@/components/Charts/config';
-
-  // Components
-  import BaseProgress from '@/components/BaseProgress';
-  import StatsCard from '@/components/Cards/StatsCard';
-
-  // Tables
-  import SocialTrafficTable from './Dashboard/SocialTrafficTable';
-  import PageVisitsTable from './Dashboard/PageVisitsTable';
   import axios from "axios";
   import NewAccount from "./NewAccount.vue";
-  import {reactive} from "vue";
+  import '@mdi/font/css/materialdesignicons.css';
 
   export default {
     components: {
@@ -69,18 +71,15 @@
       };
     },
     methods: {
-      initBigChart(index) {
-        let chartData = {
-          datasets: [
-            {
-              label: 'Performance',
-              data: this.bigLineChart.allData[index]
-            }
-          ],
-          labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        };
-        this.bigLineChart.chartData = chartData;
-        this.bigLineChart.activeIndex = index;
+      getCurrencyTypeString(currencyTypeInput) {
+        switch (currencyTypeInput) {
+          case(1):
+            return "RUB ₽";
+          case(2):
+            return "CNY ¥";
+          case(3):
+            return "AED د.إ"
+        }
       }
     },
     async mounted() {
