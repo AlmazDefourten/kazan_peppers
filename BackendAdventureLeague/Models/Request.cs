@@ -8,6 +8,8 @@ public class Request
 
     public decimal AmountToBuy { get; set; }
     
+    public decimal CostToBy { get; set; }
+    
     public CurrencyTypes CurrencyType { get; set; }
     
     public Account AccountFrom { get; set; }
