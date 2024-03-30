@@ -1,23 +1,59 @@
 <template>
   <div class="h-100 w-100">
-
-
-    <div class="pb-5 pt-5 pt-md-8 h-100" ref="tradingviewContainer">
-    </div>
-
+    <div class="pb-5 pt-5 pt-md-8 h-100" ref="tradingviewContainer"></div>
     <div>
-      <b-dropdown id="dropdown-1" text="Заявка на покупку по определенной цене" class="m-md-2">
-        <b-dropdown-item>Рубли</b-dropdown-item>
-        <b-dropdown-item>Юани</b-dropdown-item>
-        <b-dropdown-item>Дирхамы</b-dropdown-item>
-      </b-dropdown>
+<!--      ЗАЯВКА-->
+      <b-button id="create-order-button" class="m-md-2" v-b-modal.modal-1> Заявка </b-button>
+      <b-modal :hide-footer="true" id="modal-1" title="Создание заявки">
+        <template slot="default">
+          <label for="accountTo">Выберите счет для покупки валюты:</label>
+          <b-button v-b-toggle.collapse-2 class="m-2 my-button" v-if="accounts.length > 0">
+            {{ accounts[0].name }}, {{ getCurrencyTypeString(accounts[0].currencyType) }}, {{ accounts[0].sum }}
+          </b-button>
 
+          <label for="accountFrom">Выберите счет для оплаты:</label>
+          <b-button v-b-toggle.collapse-2 class="m-2 my-button" v-if="accounts.length > 0">
+            {{ accounts[0].name }}, {{ getCurrencyTypeString(accounts[0].currencyType) }}, {{ accounts[0].sum }}
+          </b-button>
+
+          <label for="currency">Выберите валюту для покупки:</label>
+          <b-dropdown id="dropdown-1" class="m-md-2">
+            <template #button-content> {{ selectedCurrency || '-----' }} </template>
+            <b-dropdown-item @click="selectedCurrency = 'Рубли'">Рубли (₽)</b-dropdown-item>
+            <b-dropdown-item @click="selectedCurrency = 'Юани'">Юани (¥)</b-dropdown-item>
+            <b-dropdown-item @click="selectedCurrency = 'Дирхам'">Дирхам (د.إ)</b-dropdown-item>
+          </b-dropdown>
+
+
+          <label for="amount">Введите сумму, которую хотите получить:</label>
+          <b-form-group>
+            <b-input-group prepend="¤">
+              <b-form-input></b-form-input>
+            </b-input-group>
+          </b-form-group>
+
+          <label for="date">Выберите дату окончания действия заявки:</label>
+          <input type="date" id="date" v-model="selectedDate">
+          <br>
+          <b-button>Отправить</b-button>
+        </template>
+      </b-modal>
+
+
+<!--      ОТОБРАЖЕНИЕ СЧЕТОВ-->
       <div type="hbox">
-        <!-- Using modifiers -->
-        <b-button v-b-toggle.collapse-2 class="m-1">Toggle Collapse</b-button>
+        <!-- Если у пользователя есть счета, отображаем первый счет -->
+        <b-button v-b-toggle.collapse-2 class="m-2 my-button" v-if="accounts.length > 0">
+          {{ accounts[0].name }}, {{ getCurrencyTypeString(accounts[0].currencyType) }}, {{ accounts[0].sum }}
+        </b-button>
+
+        <!-- Если у пользователя нет счетов, отображаем "Toggle Collapse" -->
+        <b-button v-b-toggle.collapse-2 class="m-1 my-button" v-else>
+          Toggle Collapse
+        </b-button>
 
         <!-- Element to collapse -->
-        <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-2">
+        <b-collapse v-for="(data, index) in accounts.sort((a, b) => a.id - b.id)" :key="index" id="collapse-2">
           <stats-card :title="data.name"
                       type="gradient-info"
                       :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
@@ -37,8 +73,19 @@
           <b-dropdown-item v-b-modal.modal-3>Дирхамы</b-dropdown-item>
         </b-dropdown>
         <b-modal ref="modal1" :hide-footer="true" id="modal-1" title="Открытие нового счета в рублях">
+
+<!--        Add-->
+        <b-button id="create-account-bottom" class="m-md-2" v-b-modal.modal-2> + </b-button>
+        <b-modal :hide-footer="true" id="modal-2" title="Открытие нового счета">
           <template slot="default">
             <new-account @close="() => { this.$refs.modal1.hide(); }" :currency-type="1"> </new-account>
+            <label for="currency">Выберите валюту:</label>
+            <select id="currency" v-model="selectedCurrency">
+              <option value="1">Рубли</option>
+              <option value="2">Юани</option>
+              <option value="3">Дирхамы</option>
+            </select>
+            <new-account :currency-type="selectedCurrency"> </new-account>
           </template>
         </b-modal>
         <b-modal ref="modal2" :hide-footer="true" id="modal-2" title="Открытие нового счета в юанях">
@@ -51,10 +98,12 @@
             <new-account @close="() => { this.$refs.modal3.hide(); }" :currency-type="3"> </new-account>
           </template>
         </b-modal>
+
       </div>
     </div>
   </div>
 </template>
+
 <script>
   import axios from "axios";
   import NewAccount from "./NewAccount.vue";
@@ -119,4 +168,12 @@
   padding-left: 0px;
   padding-right: 0px;
 }
+.my-button {
+  color: black;
+  background-color: #87CEEB;
+  border-color: #87CEEB;
+  max-width: 350px;
+  height: 50px; /* Высота кнопки */
+}
+
 </style>

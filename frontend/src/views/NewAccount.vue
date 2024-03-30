@@ -30,6 +30,7 @@ export default {
       description: 'Breadcrumb background type'
     }
   },
+
   mounted() {
     this.model.currencyType = this.currencyType;
   }
