@@ -10,7 +10,9 @@ public class Request
     
     public CurrencyTypes CurrencyType { get; set; }
     
-    public Account Account { get; set; }
+    public Account AccountFrom { get; set; }
+    
+    public Account AccountTo { get; set; }
 
     public ApplicationUser User { get; set; }
 }
