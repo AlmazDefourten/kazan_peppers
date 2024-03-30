@@ -33,11 +33,12 @@ export default {
 
 <template>
   <div>
+    <label for="currency">Выберите валюту для покупки:</label>
     <b-dropdown id="dropdown-1" class="m-md-2">
       <template #button-content> {{ selectedCurrency || '-----' }} </template>
-      <b-dropdown-item @click="() =>{model.currencyType= 1; selectedCurrency='Рубли';}">Рубли (₽)</b-dropdown-item>
-      <b-dropdown-item @click="() =>{model.currencyType= 2; selectedCurrency='Юани';}">Юани (¥)</b-dropdown-item>
-      <b-dropdown-item @click="() =>{model.currencyType= 3; selectedCurrency='Дирхам';}">>Дирхам (د.إ)</b-dropdown-item>
+      <b-dropdown-item @click="() =>{model.currencyType = 1; selectedCurrency='Рубли';}">Рубли (₽)</b-dropdown-item>
+      <b-dropdown-item @click="() =>{model.currencyType = 2; selectedCurrency='Юани';}">Юани (¥)</b-dropdown-item>
+      <b-dropdown-item @click="() =>{model.currencyType = 3; selectedCurrency='Дирхам';}">>Дирхам (د.إ)</b-dropdown-item>
     </b-dropdown>
   <base-input
     type="text"

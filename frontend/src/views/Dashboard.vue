@@ -8,22 +8,13 @@
         <template slot="default">
           <label for="accountTo">Выберите счет для покупки валюты:</label>
           <b-button v-b-toggle.collapse-2 class="m-2 my-button" v-if="accounts.length > 0">
-            {{ accounts[0].name }}, {{ getCurrencyTypeString(accounts[0].currencyType) }}, {{ accounts[0].sum }}
+            {{ model.selectedAccountTo.name }}, {{ getCurrencyTypeString(model.selectedAccountTo.currencyType) }}, {{ model.selectedAccountTo.sum }}
           </b-button>
 
           <label for="accountFrom">Выберите счет для оплаты:</label>
           <b-button v-b-toggle.collapse-2 class="m-2 my-button" v-if="accounts.length > 0">
-            {{ accounts[0].name }}, {{ getCurrencyTypeString(accounts[0].currencyType) }}, {{ accounts[0].sum }}
+            {{ model.selectedAccountFrom.name }}, {{ getCurrencyTypeString(model.selectedAccountFrom.currencyType) }}, {{ model.selectedAccountFrom.sum }}
           </b-button>
-
-          <label for="currency">Выберите валюту для покупки:</label>
-          <b-dropdown id="dropdown-1" class="m-md-2">
-            <template #button-content> {{ selectedCurrency || '-----' }} </template>
-            <b-dropdown-item @click="selectedCurrency = 'Рубли'">Рубли (₽)</b-dropdown-item>
-            <b-dropdown-item @click="selectedCurrency = 'Юани'">Юани (¥)</b-dropdown-item>
-            <b-dropdown-item @click="selectedCurrency = 'Дирхам'">Дирхам (د.إ)</b-dropdown-item>
-          </b-dropdown>
-
 
           <label for="amount">Введите сумму, которую хотите получить:</label>
           <b-form-group>
@@ -32,10 +23,17 @@
             </b-input-group>
           </b-form-group>
 
+          <label for="amount">Введите сумму, за которую хотите получить 1 еденицу валюты:</label>
+          <b-form-group>
+            <b-input-group>
+              <b-form-input></b-form-input>
+            </b-input-group>
+          </b-form-group>
+
           <label for="date">Выберите дату окончания действия заявки:</label>
           <input type="date" id="date" v-model="selectedDate">
           <br>
-          <b-button>Отправить</b-button>
+          <base-button @click="createRequest" size="xl" type="neutral">Создать заявку</base-button>
         </template>
       </b-modal>
 
@@ -61,7 +59,7 @@
                       style="min-width: 300px"
           >
             <template slot="icon">
-              <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100">
+              <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100" @click="model.selectedAccountFrom=data.id">
                 <i class="mdi mdi-swap-horizontal"></i>
               </base-button>
             </template>
@@ -91,10 +89,26 @@
     },
     data() {
       return {
+        model:{
+          selectedAccountTo: 0,
+          selectedAccountFrom: 0,
+          amountToBuy: 0,
+          costToBy: 0,
+          selectedDate: null
+        },
         accounts: [0, 1],
       };
     },
     methods: {
+      async createRequest() {
+        axios.post("http://107.173.25.219:81/request/create", this.model)
+          .then(response => {
+            this.$notify({type: "success", icon: "mdi mdi-check-bold", verticalAlign: 'top', horizontalAlign: 'right', message: 'Счет успешно создан'});
+          }, error => {
+            this.$notify({type: "danger", icon: "mdi mdi-remove", verticalAlign: 'top', horizontalAlign: 'right', message: 'Не удалось создать акаунт'});
+            console.log(error);
+          });
+      },
       getCurrencyTypeString(currencyTypeInput) {
         switch (currencyTypeInput) {
           case(1):
