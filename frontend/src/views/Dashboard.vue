@@ -1,8 +1,4 @@
 <template>
-
-
-
-
   <div class="h-100 w-100">
     <div class="pb-5 pt-5 pt-md-8 h-100" ref="tradingviewContainer"></div>
     <div>
@@ -102,7 +98,7 @@
         <b-button id="create-account-bottom" class="m-md-2" v-b-modal.modal-2> + </b-button>
         <b-modal ref="accountModal" :hide-footer="true" id="modal-2" title="Открытие нового счета">
           <template slot="default">
-            <new-account @close="() => { this.$refs.accountModal.hide(); }"> </new-account>
+            <new-account @close="() => { this.$refs.accountModal.hide();  loadAccounts()}"> </new-account>
           </template>
         </b-modal>
       </div>
@@ -137,8 +133,18 @@
         axios.post("http://107.173.25.219:81/request/create", this.model)
           .then(response => {
             this.$notify({type: "success", icon: "mdi mdi-check-bold", verticalAlign: 'top', horizontalAlign: 'right', message: 'Счет успешно создан'});
+            this.loadAccounts();
           }, error => {
             this.$notify({type: "danger", icon: "mdi mdi-remove", verticalAlign: 'top', horizontalAlign: 'right', message: 'Не удалось создать акаунт'});
+            console.log(error);
+          });
+      },
+      async loadAccounts() {
+        await axios.get(ApiAddress + "/account/list")
+          .then(response => {
+            this.accounts = response.data;
+            console.log(response.data);
+          }, error => {
             console.log(error);
           });
       },
