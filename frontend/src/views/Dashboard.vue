@@ -1,4 +1,8 @@
 <template>
+
+
+
+
   <div class="h-100 w-100">
     <div class="pb-5 pt-5 pt-md-8 h-100" ref="tradingviewContainer"></div>
     <div>
@@ -7,14 +11,43 @@
       <b-modal :hide-footer="true" id="modal-1" title="Создание заявки">
         <template slot="default">
           <label for="accountTo">Выберите счет для покупки валюты:</label>
-          <b-button v-b-toggle.collapse-2 class="m-2 my-button" v-if="accounts.length > 0">
+          <b-button v-b-toggle.collapse-2-modal class="m-2 my-button" v-if="accounts.length > 0">
             {{ model.selectedAccountTo.name }}, {{ getCurrencyTypeString(model.selectedAccountTo.currencyType) }}, {{ model.selectedAccountTo.sum }}
           </b-button>
+          <b-collapse v-for="(data, index) in accounts.sort((a, b) => a.id - b.id)" :key="index" id="collapse-2-modal">
+            <stats-card :title="data.name"
+                        type="gradient-info"
+                        :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
+                        class="mb-4 w-25"
+                        style="min-width: 300px"
+            >
+              <template slot="icon">
+                <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100" @click="model.selectedAccountTo=data">
+                  <i class="mdi mdi-check"></i>
+                </base-button>
+              </template>
+            </stats-card>
+          </b-collapse>
 
           <label for="accountFrom">Выберите счет для оплаты:</label>
-          <b-button v-b-toggle.collapse-2 class="m-2 my-button" v-if="accounts.length > 0">
+          <b-button v-b-toggle.collapse-3-modal class="m-2 my-button" v-if="accounts.length > 0">
             {{ model.selectedAccountFrom.name }}, {{ getCurrencyTypeString(model.selectedAccountFrom.currencyType) }}, {{ model.selectedAccountFrom.sum }}
           </b-button>
+
+          <b-collapse v-for="(data, index) in accounts.sort((a, b) => a.id - b.id)" :key="index" id="collapse-3-modal">
+            <stats-card :title="data.name"
+                        type="gradient-info"
+                        :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
+                        class="mb-4 w-25"
+                        style="min-width: 300px"
+            >
+              <template slot="icon">
+                <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100" @click="model.selectedAccountFrom=data">
+                  <i class="mdi mdi-check"></i>
+                </base-button>
+              </template>
+            </stats-card>
+          </b-collapse>
 
           <label for="amount">Введите сумму, которую хотите получить:</label>
           <b-form-group>
@@ -41,7 +74,7 @@
 <!--      ОТОБРАЖЕНИЕ СЧЕТОВ-->
       <div type="hbox">
         <!-- Если у пользователя есть счета, отображаем первый счет -->
-        <b-button v-b-toggle.collapse-2 class="m-2 my-button" v-if="accounts.length > 0">
+        <b-button v-b-toggle.collapse-1 class="m-2 my-button" v-if="accounts.length > 0">
           {{ accounts[0].name }}, {{ getCurrencyTypeString(accounts[0].currencyType) }}, {{ accounts[0].sum }}
         </b-button>
 
@@ -51,7 +84,7 @@
         </b-button>
 
         <!-- Element to collapse -->
-        <b-collapse v-for="(data, index) in accounts.sort((a, b) => a.id - b.id)" :key="index" id="collapse-2">
+        <b-collapse v-for="(data, index) in accounts.sort((a, b) => a.id - b.id)" :key="index" id="collapse-1">
           <stats-card :title="data.name"
                       type="gradient-info"
                       :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
@@ -59,7 +92,7 @@
                       style="min-width: 300px"
           >
             <template slot="icon">
-              <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100" @click="model.selectedAccountFrom=data.id">
+              <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100">
                 <i class="mdi mdi-swap-horizontal"></i>
               </base-button>
             </template>
