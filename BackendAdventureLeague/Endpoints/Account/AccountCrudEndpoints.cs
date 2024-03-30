@@ -36,4 +36,15 @@ public class AccountCrudEndpoints(IApplicationDbContext context, IHttpContextAcc
         context.Accounts.Remove(await context.Accounts.FindAsync(id));
         await context.SaveChangesAsync(cancellationToken);
     }
+    
+    public async Task TransferAsync(long idFrom, long idTo, decimal sum, CancellationToken cancellationToken = default)
+    {
+        var from = context.Accounts.FindAsync(idFrom);
+        var to = context.Accounts.FindAsync(idTo);
+        
+        
+        
+        context.Accounts.Remove(await context.Accounts.FindAsync(1));
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

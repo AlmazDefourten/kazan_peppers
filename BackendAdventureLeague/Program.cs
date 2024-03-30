@@ -14,7 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
 builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
-    options.UseNpgsql("Server=localhost;Port=5432;Database=backend;User Id=postgres;Password=123654gg;");
+    options.UseNpgsql("Server=localhost;Port=5432;Database=backend;User Id=postgres;Password=123654gg;Include Error Detail=true;");
 });
 
 builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());

@@ -26,8 +26,9 @@ public interface IApplicationDbContext
     DbSet<Account> Accounts { get; }
     
     DbSet<Request> Requests { get; }
-
-
+    
+    DbSet<ApplicationUser> Users { get; }
+    
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     
     int SaveChanges();

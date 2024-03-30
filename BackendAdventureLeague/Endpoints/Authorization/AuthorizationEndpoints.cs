@@ -40,18 +40,19 @@ public static class AuthorizationEndpoints
             {
                 return CreateValidationProblem(result);
             }
-
-            var mainAccount = new Models.Account
-            {
-                CurrencyType = CurrencyTypes.Ruble,
-                Sum = 100000,
-                Name = "Основной",
-                User = user
-            };
-            
             using (var scope = app.Services.CreateScope()) {
                 var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
 
+                var gettedUser = await dbContext.Users.FindAsync(user.Id);
+
+                var mainAccount = new Models.Account
+                {
+                    CurrencyType = CurrencyTypes.Ruble,
+                    Sum = 100000,
+                    Name = "Основной",
+                    User = gettedUser
+                };
+                
                 dbContext.Accounts.Add(mainAccount);
 
                 await dbContext.SaveChangesAsync();

@@ -11,7 +11,9 @@ public class RequestsService(IApplicationDbContext context, IHttpContextAccessor
         var claims = contextAccessor.HttpContext?.User;
         var currentUser = await userManager.GetUserAsync(claims!);
 
-        if (currentUser != null) account.User = currentUser;
+        var gettedUser = await context.Users.FindAsync(currentUser.Id);
+
+        if (gettedUser != null) account.User = gettedUser;
         await context.Requests.AddAsync(account, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
