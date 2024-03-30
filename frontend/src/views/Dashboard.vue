@@ -10,7 +10,7 @@
           <b-button v-b-toggle.collapse-2-modal class="m-2 my-button" v-if="accounts.length > 0">
             {{ model.selectedAccountTo.name }}, {{ getCurrencyTypeString(model.selectedAccountTo.currencyType) }}, {{ model.selectedAccountTo.sum }}
           </b-button>
-          <b-collapse v-for="(data, index) in accounts.sort((a, b) => a.id - b.id)" :key="index" id="collapse-2-modal">
+          <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-2-modal">
             <stats-card :title="data.name"
                         type="gradient-info"
                         :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
@@ -18,7 +18,7 @@
                         style="min-width: 300px"
             >
               <template slot="icon">
-                <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100" @click="model.selectedAccountTo=data">
+                <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100" @click="() => {model.selectedAccountTo=data;}">
                   <i class="mdi mdi-check"></i>
                 </base-button>
               </template>
@@ -30,7 +30,7 @@
             {{ model.selectedAccountFrom.name }}, {{ getCurrencyTypeString(model.selectedAccountFrom.currencyType) }}, {{ model.selectedAccountFrom.sum }}
           </b-button>
 
-          <b-collapse v-for="(data, index) in accounts.sort((a, b) => a.id - b.id)" :key="index" id="collapse-3-modal">
+          <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-3-modal">
             <stats-card :title="data.name"
                         type="gradient-info"
                         :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
@@ -60,7 +60,7 @@
           </b-form-group>
 
           <label for="date">Выберите дату окончания действия заявки:</label>
-          <input type="date" id="date" v-model="selectedDate">
+          <input type="date" id="date" v-model="model.selectedDate">
           <br>
           <base-button @click="createRequest" size="xl" type="neutral">Создать заявку</base-button>
         </template>
@@ -80,7 +80,7 @@
         </b-button>
 
         <!-- Element to collapse -->
-        <b-collapse v-for="(data, index) in accounts.sort((a, b) => a.id - b.id)" :key="index" id="collapse-1">
+        <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-1">
           <stats-card :title="data.name"
                       type="gradient-info"
                       :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
@@ -130,7 +130,7 @@
     },
     methods: {
       async createRequest() {
-        axios.post("http://107.173.25.219:81/request/create", this.model)
+        axios.post(ApiAddress + "/request/create", this.model)
           .then(response => {
             this.$notify({type: "success", icon: "mdi mdi-check-bold", verticalAlign: 'top', horizontalAlign: 'right', message: 'Счет успешно создан'});
             this.loadAccounts();
