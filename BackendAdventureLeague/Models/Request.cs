@@ -7,6 +7,8 @@ public class Request
     public DateTime ExpirationTime { get; set; }
 
     public decimal AmountToBuy { get; set; }
+    
+    public CurrencyTypes CurrencyType { get; set; }
 
     public ApplicationUser User { get; set; }
 }
