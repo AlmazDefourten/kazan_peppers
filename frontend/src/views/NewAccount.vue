@@ -6,7 +6,7 @@ export default {
   data() {
     return {
       model: {
-        currencyType: this.currencyType,
+        currencyType: 0,
         Sum: 0,
         Name: ""
       }
@@ -23,23 +23,19 @@ export default {
     },
   },
   name: "new-account",
-  props: {
-    currencyType: {
-      type: Number,
-      default: 0,
-      description: 'Breadcrumb background type'
-    }
-  },
 
-  mounted() {
-    this.model.currencyType = this.currencyType;
-  }
 };
 
 </script>
 
 <template>
   <div>
+    <b-dropdown id="dropdown-1" class="m-md-2">
+      <template #button-content> {{ selectedCurrency || '-----' }} </template>
+      <b-dropdown-item @click="() =>{model.currencyType= 1; selectedCurrency='Рубли';}">Рубли (₽)</b-dropdown-item>
+      <b-dropdown-item @click="() =>{model.currencyType= 1; selectedCurrency='Юани';}">Юани (¥)</b-dropdown-item>
+      <b-dropdown-item @click="() =>{model.currencyType= 1; selectedCurrency='Дирхам';}">>Дирхам (د.إ)</b-dropdown-item>
+    </b-dropdown>
   <base-input
     type="text"
     label="Наименование счета"

@@ -67,38 +67,13 @@
             </template>
           </stats-card>
         </b-collapse>
-        <b-dropdown id="dropdown-1" text="+" class="m-md-2">
-          <b-dropdown-item v-b-modal.modal-1>Рубли</b-dropdown-item>
-          <b-dropdown-item v-b-modal.modal-2>Юани</b-dropdown-item>
-          <b-dropdown-item v-b-modal.modal-3>Дирхамы</b-dropdown-item>
-        </b-dropdown>
-        <b-modal ref="modal1" :hide-footer="true" id="modal-1" title="Открытие нового счета в рублях">
 
-<!--        Add-->
         <b-button id="create-account-bottom" class="m-md-2" v-b-modal.modal-2> + </b-button>
-        <b-modal :hide-footer="true" id="modal-2" title="Открытие нового счета">
+        <b-modal ref="accountModal" :hide-footer="true" id="modal-2" title="Открытие нового счета">
           <template slot="default">
-            <new-account @close="() => { this.$refs.modal1.hide(); }" :currency-type="1"> </new-account>
-            <label for="currency">Выберите валюту:</label>
-            <select id="currency" v-model="selectedCurrency">
-              <option value="1">Рубли</option>
-              <option value="2">Юани</option>
-              <option value="3">Дирхамы</option>
-            </select>
-            <new-account :currency-type="selectedCurrency"> </new-account>
+            <new-account @close="() => { this.$refs.accountModal.hide(); }"> </new-account>
           </template>
         </b-modal>
-        <b-modal ref="modal2" :hide-footer="true" id="modal-2" title="Открытие нового счета в юанях">
-          <template slot="default">
-            <new-account @close="() => { this.$refs.modal2.hide(); }" :currency-type="2"> </new-account>
-          </template>
-        </b-modal>
-        <b-modal ref="modal3" :hide-footer="true" id="modal-3" title="Открытие нового счета в дирхамах">
-          <template slot="default">
-            <new-account @close="() => { this.$refs.modal3.hide(); }" :currency-type="3"> </new-account>
-          </template>
-        </b-modal>
-
       </div>
     </div>
   </div>
