@@ -17,7 +17,7 @@ a.GetCurrency(CurrencyTypes.Yuan);
 
 string fullUrl = "https://quote.rbc.ru/tag/currency"; 
 var options = new FirefoxOptions(){ 
-    BinaryLocation = "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" 
+    BinaryLocation = "/usr/bin/chromedriver" 
 }; 
  
 var browser = new FirefoxDriver(options); 
