@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BackendAdventureLeague.Endpoints.Account;
 
-public class AccountCrudEndpoints(IApplicationDbContext context, IHttpContextAccessor contextAccessor, UserManager<ApplicationUser> userManager) : IAccountCrudEndpoints
+public class AccountCrudEndpoints(IApplicationDbContext context, IHttpContextAccessor contextAccessor, UserManager<ApplicationUser> userManager, ICurrencyService currencyService) : IAccountCrudEndpoints
 {
     public async Task CreateAsync(Models.Account account, CancellationToken cancellationToken = default)
     {
@@ -44,73 +44,7 @@ public class AccountCrudEndpoints(IApplicationDbContext context, IHttpContextAcc
         var from = await context.Accounts.FindAsync(idFrom);
         var to = await context.Accounts.FindAsync(idTo);
 
-        decimal toSum = 0;
-        decimal toMinus = 0;
-
-        switch (from.CurrencyType)
-        {
-            case(CurrencyTypes.Ruble):
-                switch (to.CurrencyType)
-                {
-                    case CurrencyTypes.Ruble:
-                        toSum = sum;
-                        toMinus = sum;
-                        break;
-                    case CurrencyTypes.Dirham:
-                        toSum = sum;
-                        toMinus = sum * CurrencyService.RoubleToDyrhamCourse;
-                        break;
-                    case CurrencyTypes.Yuan:
-                        toSum = sum;
-                        toMinus = sum * CurrencyService.RoubleToYuanCourse;
-                        break;
-                }
-                break;
-            case CurrencyTypes.Yuan:
-                switch (to.CurrencyType)
-                {
-                    case CurrencyTypes.Yuan:
-                        toSum = sum;
-                        toMinus = sum;
-                        break;
-                    case CurrencyTypes.Dirham:
-                        toSum = sum;
-                        toMinus = sum * CurrencyService.YuanToDyrhamCourse;
-                        break;
-                    case CurrencyTypes.Ruble:
-                        toSum = sum;
-                        toMinus = sum * CurrencyService.YuanToRoubleCourse;
-                        break;
-                }
-                break;
-            case CurrencyTypes.Dirham:
-                switch (to.CurrencyType)
-                {
-                    case CurrencyTypes.Dirham:
-                        toSum = sum;
-                        toMinus = sum;
-                        break;
-                    case CurrencyTypes.Ruble:
-                        toSum = sum;
-                        toMinus = sum * CurrencyService.DyrhamToRoubleCourse;
-                        break;
-                    case CurrencyTypes.Yuan:
-                        toSum = sum;
-                        toMinus = sum * CurrencyService.DyrhamToYuanCourse;
-                        break;
-                }
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-
-        if (from.Sum < sum || from.CurrencyType == to.CurrencyType)
-        {
-            return;
-        }
-
-        to.Sum += Math.Round(toSum, 2);
-        from.Sum -= Math.Round(toMinus, 2);
+        currencyService.TransferMoney(from, to, sum);
         
         await context.SaveChangesAsync(cancellationToken);
     }

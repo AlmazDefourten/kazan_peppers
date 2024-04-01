@@ -7,4 +7,5 @@ public interface ICurrencyService
     decimal GetCurrency(CurrencyTypes curType);
     static decimal RoubleToYuanCourse { get; set; }
     static decimal RoubleToDyrhamCourse { get; set; }
+    void TransferMoney(Account from, Account to, decimal sum);
 }

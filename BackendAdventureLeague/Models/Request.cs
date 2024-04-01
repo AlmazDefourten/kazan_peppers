@@ -15,4 +15,6 @@ public class Request
     public Account AccountTo { get; set; }
 
     public ApplicationUser User { get; set; }
+
+    public bool IsActual { get; set; } = true;
 }

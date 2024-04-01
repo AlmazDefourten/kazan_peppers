@@ -57,4 +57,80 @@ public class CurrencyService : ICurrencyService
 
         return 0;
     }
+
+    public void TransferMoney(Account from, Account to, decimal sum)
+    {
+        decimal toSum = 0;
+        decimal toMinus = 0;
+
+        switch (from.CurrencyType)
+        {
+            case(CurrencyTypes.Ruble):
+                switch (to.CurrencyType)
+                {
+                    case CurrencyTypes.Ruble:
+                        toSum = sum;
+                        toMinus = sum;
+                        break;
+                    case CurrencyTypes.Dirham:
+                        toSum = sum;
+                        toMinus = sum * RoubleToDyrhamCourse;
+                        break;
+                    case CurrencyTypes.Yuan:
+                        toSum = sum;
+                        toMinus = sum * RoubleToYuanCourse;
+                        break;
+                }
+                break;
+            case CurrencyTypes.Yuan:
+                switch (to.CurrencyType)
+                {
+                    case CurrencyTypes.Yuan:
+                        toSum = sum;
+                        toMinus = sum;
+                        break;
+                    case CurrencyTypes.Dirham:
+                        toSum = sum;
+                        toMinus = sum * YuanToDyrhamCourse;
+                        break;
+                    case CurrencyTypes.Ruble:
+                        toSum = sum;
+                        toMinus = sum * YuanToRoubleCourse;
+                        break;
+                }
+                break;
+            case CurrencyTypes.Dirham:
+                switch (to.CurrencyType)
+                {
+                    case CurrencyTypes.Dirham:
+                        toSum = sum;
+                        toMinus = sum;
+                        break;
+                    case CurrencyTypes.Ruble:
+                        toSum = sum;
+                        toMinus = sum * DyrhamToRoubleCourse;
+                        break;
+                    case CurrencyTypes.Yuan:
+                        toSum = sum;
+                        toMinus = sum * DyrhamToYuanCourse;
+                        break;
+                }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        if (from.Sum < sum || from.CurrencyType == to.CurrencyType)
+        {
+            return;
+        }
+
+        if (from.Sum - Math.Round(toMinus, 2) <= 0)
+        {
+            return;
+        }
+
+        to.Sum += Math.Round(toSum, 2);
+        from.Sum -= Math.Round(toMinus, 2);
+    }
 }

@@ -4,111 +4,118 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BackendAdventureLeague.Services;
 
-public class BackgroundWorkerService(IApplicationDbContext dbContext) : IBackgroundWorkerService
+public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyService currencyService) : IBackgroundWorkerService
 {
-    public static BackgroundWorker BackgroundWorker = new BackgroundWorker();
+    private static readonly BackgroundWorker BackgroundWorker = new();
 
     public void RequestWorker()
     {
-        BackgroundWorker.DoWork += (sender, e) =>
+        BackgroundWorker.DoWork += (_, _) =>
         {
                 while (true)
                 {
                     var now = DateTime.Now;
+                    
+                    if (now is { Hour: 11, Minute: 31 })
+                    {
+                        currencyService.GetCurrency(CurrencyTypes.Dirham);
+                    }
+                    
                     var requests = dbContext.Requests
                         .Include(x => x.AccountTo)
                         .Include(x => x.AccountFrom)
                         .Include(x => x.User)
-                        .Where(r => r.ExpirationTime.Year == now.Year && r.ExpirationTime.Month == now.Month
-                                                        && r.ExpirationTime.Day == now.Day && r.ExpirationTime.Hour == now.Hour && r.ExpirationTime.Minute == now.Minute);
+                        .Where(r => r.ExpirationTime.Year >= now.Year && r.ExpirationTime.Month >= now.Month
+                                                        && r.ExpirationTime.Day >= now.Day && r.ExpirationTime.Hour >= now.Hour && r.ExpirationTime.Minute >= now.Minute && r.IsActual);
                     
                     foreach (var request in requests.ToList())
                     {
-                        Console.WriteLine(request.AmountToBuy);
-                        var from = request.AccountFrom;
-                        var to = request.AccountTo;
-
-                        decimal toSum = 0;
-                        decimal toMinus = 0;
-
-                        switch (from.CurrencyType)
+                        switch (request.AccountFrom.CurrencyType)
                         {
                             case(CurrencyTypes.Ruble):
-                                switch (to.CurrencyType)
+                                switch (request.AccountTo.CurrencyType)
                                 {
-                                    case CurrencyTypes.Ruble:
-                                        toSum = request.AmountToBuy;
-                                        toMinus = request.AmountToBuy;
-                                        break;
                                     case CurrencyTypes.Dirham:
-                                        toSum = request.AmountToBuy;
-                                        toMinus = request.AmountToBuy * CurrencyService.RoubleToDyrhamCourse;
+                                        if (Math.Abs(CurrencyService.RoubleToDyrhamCourse - request.CostToBy) >= 0.5m)
+                                        {
+                                            continue;
+                                        }
                                         break;
                                     case CurrencyTypes.Yuan:
-                                        toSum = request.AmountToBuy;
-                                        toMinus = request.AmountToBuy * CurrencyService.RoubleToYuanCourse;
+                                        if (Math.Abs(CurrencyService.RoubleToYuanCourse - request.CostToBy) >= 0.5m)
+                                        {
+                                            continue;
+                                        }
                                         break;
                                 }
                                 break;
                             case CurrencyTypes.Yuan:
-                                switch (to.CurrencyType)
+                                switch (request.AccountTo.CurrencyType)
                                 {
-                                    case CurrencyTypes.Yuan:
-                                        toSum = request.AmountToBuy;
-                                        toMinus = request.AmountToBuy;
-                                        break;
                                     case CurrencyTypes.Dirham:
-                                        toSum = request.AmountToBuy;
-                                        toMinus = request.AmountToBuy * CurrencyService.YuanToDyrhamCourse;
+                                        if (Math.Abs(CurrencyService.YuanToDyrhamCourse - request.CostToBy) >= 0.5m)
+                                        {
+                                            continue;
+                                        }
                                         break;
                                     case CurrencyTypes.Ruble:
-                                        toSum = request.AmountToBuy;
-                                        toMinus = request.AmountToBuy * CurrencyService.YuanToRoubleCourse;
+                                        if (Math.Abs(CurrencyService.YuanToRoubleCourse - request.CostToBy) >= 0.5m)
+                                        {
+                                            continue;
+                                        }
                                         break;
                                 }
                                 break;
                             case CurrencyTypes.Dirham:
-                                switch (to.CurrencyType)
+                                switch (request.AccountTo.CurrencyType)
                                 {
-                                    case CurrencyTypes.Dirham:
-                                        toSum = request.AmountToBuy;
-                                        toMinus = request.AmountToBuy;
-                                        break;
                                     case CurrencyTypes.Ruble:
-                                        toSum = request.AmountToBuy;
-                                        toMinus = request.AmountToBuy * CurrencyService.DyrhamToRoubleCourse;
+                                        if (Math.Abs(CurrencyService.DyrhamToRoubleCourse - request.CostToBy) >= 0.5m)
+                                        {
+                                            continue;
+                                        }
                                         break;
                                     case CurrencyTypes.Yuan:
-                                        toSum = request.AmountToBuy;
-                                        toMinus = request.AmountToBuy * CurrencyService.DyrhamToYuanCourse;
+                                        if (Math.Abs(CurrencyService.DyrhamToYuanCourse - request.CostToBy) >= 0.5m)
+                                        {
+                                            continue;
+                                        }
                                         break;
                                 }
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
-
-                        if (from.Sum < request.AmountToBuy || from.CurrencyType == to.CurrencyType)
-                        {
-                            return;
-                        }
-
-                        if (from.Sum - toMinus < 0)
-                        {
-                            return;
-                        }
                         
-                        to.Sum += Math.Round(toSum, 2);
-                        from.Sum -= Math.Round(toMinus, 2);
-        
+                        var from = request.AccountFrom;
+                        var to = request.AccountTo;
+
+                        currencyService.TransferMoney(from, to, request.AmountToBuy);
+
+                        request.IsActual = false;
+                        
                         dbContext.SaveChanges();
                     }
                     
+                    var requestsToDelete = dbContext.Requests
+                        .Include(x => x.AccountTo)
+                        .Include(x => x.AccountFrom)
+                        .Include(x => x.User)
+                        .Where(r => r.ExpirationTime.Year <= now.Year && r.ExpirationTime.Month <= now.Month
+                                                                      && r.ExpirationTime.Day <= now.Day && r.ExpirationTime.Hour <= now.Hour && r.ExpirationTime.Minute < now.Minute);
+                    
+                    foreach (var request in requestsToDelete)
+                    {
+                        request.IsActual = false;
+                    }
+
+                    dbContext.SaveChanges();
+                    
                     // Подождите 1 минуту перед следующей итерацией
-                    Thread.Sleep(55000); // 60000 миллисекунд = 1 минута
+                    Thread.Sleep(60000); // 60000 миллисекунд = 1 минута
                 }
         };
-
+        
         BackgroundWorker.RunWorkerAsync();
     }
 }
