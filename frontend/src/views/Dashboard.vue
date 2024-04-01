@@ -1,13 +1,130 @@
 <template>
+<div>
   <div class="h-100 w-100 d-flex">
-    <div class="pb-5 pt-5 pt-md-8 w-75" ref="tradingviewContainer"></div>
-    <div class="pb-5 pt-5 pt-md-8">
-<!--      ЗАЯВКА-->
-      <b-button id="create-order-button" class="m-md-2" v-b-modal.modal-1> Заявка </b-button>
+    <b-modal ref="transferModal" :hide-footer="true" id="modal-4" title="Перевод между счетами" >
+      <template slot="default">
+        <label for="accountFrom"class="col-md-12 col-form-label form-control-label">С какого счета:</label>
+        <b-button v-b-toggle.collapse-2-modal class="m-1 my-button" v-if="accounts.length > 0" v-model="transferModel.selectedFrom" style="width: 295px"> Счёт:
+          {{ transferModel.selectedFrom.name }}, {{ getCurrencyTypeString(transferModel.selectedFrom.currencyType) }}, {{ transferModel.selectedFrom.sum }}
+        </b-button>
+        <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-2-modal">
+          <stats-card :title="data.name"
+                      type="gradient-info"
+                      :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
+                      class="mb-4 w-25"
+                      style="min-width: 300px"
+          >
+            <template slot="icon">
+              <base-button size="sm" style="background-color: #003791" icon class="w-100 h-100" @click="() => {transferModel.selectedFrom=data;}">
+                <i class="mdi mdi-check"></i>
+              </base-button>
+            </template>
+          </stats-card>
+        </b-collapse>
+
+        <label for="accountFrom"class="col-md-12 col-form-label form-control-label">На какой счет:</label>
+        <b-button v-b-toggle.collapse-3-modal class="m-1 my-button" v-if="accounts.length > 0" v-model="transferModel.selectedTo" style="width: 295px"> Счёт:
+          {{ transferModel.selectedTo.name }}, {{ getCurrencyTypeString(transferModel.selectedTo.currencyType) }}, {{ transferModel.selectedTo.sum }}
+        </b-button>
+
+        <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-3-modal">
+          <stats-card :title="data.name"
+                      type="gradient-info"
+                      :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
+                      class="mb-4 w-25"
+                      style="min-width: 300px"
+          >
+            <template slot="icon">
+              <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100" @click="transferModel.selectedTo=data">
+                <i class="mdi mdi-check"></i>
+              </base-button>
+            </template>
+          </stats-card>
+        </b-collapse>
+
+        <label for="amount" class="col-md-12 col-form-label form-control-label">Введите сумму, которую хотите перевести:</label>
+        <base-input alternative v-model="transferModel.sum"></base-input>
+        <label for="amount" class="col-md-12 col-form-label form-control-label pb-1">Актуальный курс валют:</label>
+        <div class="d-flex pt-2 justify-content-between pb-3">
+          <stats-card title="Юань"
+                      type="mdi"
+                      :sub-title="yuanCurrency"
+          >
+
+          </stats-card>
+
+          <stats-card title="Доллар"
+                      type="mdi"
+                      sub-title="1000"
+          >
+          </stats-card>
+
+
+          <stats-card title="Дирхам"
+                      type="gradient-orange"
+                      :sub-title="dirhamCurrency"
+          >
+
+
+          </stats-card>
+
+        </div>
+
+
+        <base-button @click="interAccountTransfer" size="xl" type="neutral">Перевести деньги</base-button>
+      </template>
+    </b-modal>
+    <!--    КУРС ВАЛЮТ-->
+    <div class="pb-2 pt-5 pt-md-8 w-75" ref="tradingviewContainer">
+      <div class="d-flex pt-2 justify-content-around">
+        <stats-card title="Юань"
+                    type="mdi"
+                    :sub-title="yuanCurrency"
+                    >
+
+          <template slot="footer">
+            <span class="font-weight-bold">Курс обновляется 1 раз в сутки!</span>
+          </template>
+          <template slot="icon" >
+            <img width="35" src="../../public/img/currencies/dirham.png" alt="">
+          </template>
+        </stats-card>
+
+
+        <stats-card title="Доллар США"
+                    type="mdi"
+                    sub-title="1000"
+        >
+          <template slot="footer">
+            <span class="font-weight-bold">Курс обновляется 1 раз в сутки!</span>
+          </template>
+          <template slot="icon" >
+            <img width="30" src="../../public/img/currencies/DOLLAR.png" alt="">
+          </template>
+        </stats-card>
+
+
+        <stats-card title="Дирхам"
+                    type="gradient-orange"
+                    :sub-title="dirhamCurrency"
+                    icon="ni ni-chart-pie-35">
+          <template slot="footer">
+            <span class="font-weight-bold">Курс обновляется 1 раз в сутки!</span>
+          </template>
+          <template slot="icon" >
+            <img width="30" src="../../public/img/currencies/YUAN.png" alt="">
+          </template>
+        </stats-card>
+
+      </div>
+    </div>
+    <!--      ЗАЯВКА-->
+    <div class="pb-2 pt-5 pt-md-8">
+      <b-button id="create-order-button" class="m-md-2" style="width: 259px; border-color: #1fa2ff" v-b-modal.modal-1> Заявка </b-button>
       <b-modal :hide-footer="true" id="modal-1" title="Создание заявки">
         <template slot="default">
-          <label for="accountFrom"class="col-md-12 col-form-label form-control-label">Выберите счет для покупки валюты:</label>
-          <b-button v-b-toggle.collapse-2-modal class="m-1 w-75 my-button" v-if="accounts.length > 0" v-model="model.selectedAccountFrom"> Счёт:
+          <label for="accountFrom"class="col-md-12 col-form-label form-control-label">На:</label>
+          <b-button v-b-toggle.collapse-2-modal class="m-1 my-button" v-if="accounts.length > 0" v-model="model.selectedAccountFrom" style="width: 295px"> Счёт:
           {{ model.selectedAccountTo.name }}, {{ getCurrencyTypeString(model.selectedAccountTo.currencyType) }}, {{ model.selectedAccountTo.sum }}
           </b-button>
           <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-2-modal">
@@ -26,7 +143,7 @@
           </b-collapse>
 
           <label for="accountFrom"class="col-md-12 col-form-label form-control-label">Выберите счет для оплаты:</label>
-          <b-button v-b-toggle.collapse-3-modal class="m-1 w-75 my-button" v-if="accounts.length > 0" v-model="model.selectedAccountTo"> Счёт:
+          <b-button v-b-toggle.collapse-3-modal class="m-1 my-button" v-if="accounts.length > 0" v-model="model.selectedAccountTo" style="width: 295px"> Счёт:
             {{ model.selectedAccountFrom.name }}, {{ getCurrencyTypeString(model.selectedAccountFrom.currencyType) }}, {{ model.selectedAccountFrom.sum }}
           </b-button>
 
@@ -46,18 +163,11 @@
           </b-collapse>
 
           <label for="amount" class="col-md-12 col-form-label form-control-label">Введите сумму, которую хотите получить:</label>
-          <b-form-group>
-            <b-input-group prepend="¤">
-              <b-form-input v-model="model.amountToBuy"></b-form-input>
-            </b-input-group>
-          </b-form-group>
+          <base-input alternative v-model="model.amountToBuy"></base-input>
+
 
           <label for="amount" class="col-md-12 col-form-label form-control-label">Введите сумму, за которую хотите получить 1 еденицу валюты:</label>
-          <b-form-group>
-            <b-input-group>
-              <b-form-input v-model="model.costToBy"></b-form-input>
-            </b-input-group>
-          </b-form-group>
+          <base-input alternative v-model="model.costToBy"></base-input>
 
 <!--          <label for="date">Выберите дату и вроемя окончания действия заявки:</label>-->
           <label for="date" class="col-md-12 col-form-label form-control-label">Выберите дату и время окончания действия заявки:</label>
@@ -97,21 +207,27 @@
                       style="min-width: 300px"
           >
             <template slot="icon">
-              <base-button size="sm" style="background-color: darkblue" icon class="w-100 h-100">
+              <base-button id="inter-account-transfer" v-b-modal.modal-4 size="sm" style="background-color: #003791" icon class="w-100 h-100">
                 <i class="mdi mdi-swap-horizontal"></i>
               </base-button>
             </template>
           </stats-card>
         </b-collapse>
 
-        <b-button id="create-account-bottom" class="m-md-2" v-b-modal.modal-2> + </b-button>
-        <b-modal ref="accountModal" :hide-footer="true" id="modal-2" title="Открытие нового счета">
+        <b-button id="create-account-bottom" class="m-2 my-button" v-b-modal.modal-2 > + </b-button>
+        <b-modal ref="accountModal" :hide-footer="true" id="modal-2" title="Открытие нового счета" >
           <template slot="default">
             <new-account @close="() => { this.$refs.accountModal.hide();  loadAccounts()}"> </new-account>
           </template>
         </b-modal>
       </div>
     </div>
+<!--    Список заявок-->
+    <div class="pb-2 pt-5 pt-md-8">
+
+    </div>
+  </div>
+
   </div>
 </template>
 
@@ -122,6 +238,7 @@
   import {ApiAddress} from "@/common.ts";
 
   export default {
+    name: "my-cool-component",
     components: {
       NewAccount
     },
@@ -133,9 +250,16 @@
           amountToBuy: 0,
           costToBy: 0,
           selectedDate: null,
-          selectedTime: null
+          selectedTime: null,
+        },
+        transferModel:{
+          selectedFrom: 0,
+          selectedTo: 0,
+          sum: 0,
         },
         accounts: [0, 1],
+        yuanCurrency: 0,
+        dirhamCurrency: 0,
       };
     },
     methods: {
@@ -156,6 +280,21 @@
             console.log(error);
           });
       },
+      // СДЕЛАТЬ!!!!!!!!!!!!
+      async interAccountTransfer(){
+        const modelToTransfer ={
+          idTo: this.transferModel.selectedTo.id,
+          idFrom: this.transferModel.selectedFrom.id,
+          sum: this.transferModel.sum
+        }
+        axios.post(ApiAddress + "/account/transfer", {idTo: modelToTransfer.idTo, idFrom: modelToTransfer.idFrom, sum: modelToTransfer.sum })
+          .then(response => {
+
+          }, error => {
+
+          });
+      },
+
       async loadAccounts() {
         await axios.get(ApiAddress + "/account/list")
           .then(response => {
@@ -168,11 +307,11 @@
       getCurrencyTypeString(currencyTypeInput) {
         switch (currencyTypeInput) {
           case(1):
-            return "RUB ₽";
+            return "₽";
           case(2):
-            return "CNY ¥";
+            return "¥";
           case(3):
-            return "AED د.إ"
+            return "د.إ"
         }
       }
     },
@@ -195,12 +334,21 @@
         "calendar": false,
         "support_host": "https://www.tradingview.com"
       });
-      this.$refs.tradingviewContainer.appendChild(script);
+      this.$refs.tradingviewContainer.insertBefore(script, this.$refs.tradingviewContainer.firstChild);
     },
     async beforeMount() {
       await axios.get(ApiAddress + "/account/list")
         .then(response => {
           this.accounts = response.data;
+          console.log(response.data);
+        }, error => {
+          console.log(error);
+        });
+      await axios.get(ApiAddress + "/currency/get")
+        .then(response => {
+          const arr = response.data.split(" ");
+          this.yuanCurrency = parseFloat(arr[0]).toFixed(2);
+          this.dirhamCurrency = parseFloat(arr[1]).toFixed(2);
           console.log(response.data);
         }, error => {
           console.log(error);
@@ -215,11 +363,17 @@
   padding-right: 0px;
 }
 .my-button {
-  color: black;
-  background-color: #87CEEB;
-  border-color: #87CEEB;
+  color: white;
+  background-color: #003791;
+  border-color: black;
   max-width: 350px;
   height: 50px; /* Высота кнопки */
+  transition: background-color 0.4s, color 0.4s;
+}
+.my-button:hover {
+  color: black;
+  background-color: white;
+  box-shadow: inset 0 0 0 3px #3a7999;
 }
 
 </style>
