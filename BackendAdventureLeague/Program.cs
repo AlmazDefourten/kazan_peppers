@@ -42,6 +42,7 @@ builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddApiEndpoints();
 
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<IBackgroundWorkerService, BackgroundWorkerService>();
 
 builder.Services.AddSingleton<ICurrencyService, CurrencyService>();
 
@@ -74,6 +75,9 @@ using var scope = app.Services.CreateScope();
 
 var context = scope.ServiceProvider.GetService<ApplicationDbContext>();
 await context?.Database.MigrateAsync()!;
+
+var worker = scope.ServiceProvider.GetRequiredService<IBackgroundWorkerService>();
+worker.RequestWorker();
 
 app.Run();
 

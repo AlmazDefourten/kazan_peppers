@@ -6,9 +6,17 @@ namespace BackendAdventureLeague.Services;
 
 public class CurrencyService : ICurrencyService
 {
-    public static decimal DyrhamCourse { get; set; }
+    public static decimal RoubleToDyrhamCourse { get; set; }
     
-    public static decimal YuanCourse { get; set; }
+    public static decimal RoubleToYuanCourse { get; set; }
+    
+    public static decimal YuanToRoubleCourse { get; set; }
+    
+    public static decimal YuanToDyrhamCourse { get; set; }
+    
+    public static decimal DyrhamToRoubleCourse { get; set; }
+    
+    public static decimal DyrhamToYuanCourse { get; set; }
     
     public decimal GetCurrency(CurrencyTypes curType)
     {
@@ -31,17 +39,21 @@ public class CurrencyService : ICurrencyService
             switch (code)
             {
                 case "AED":
-                    DyrhamCourse = val;
+                    RoubleToDyrhamCourse = val;
+                    DyrhamToRoubleCourse = 1 / val;
                     if (curType == CurrencyTypes.Dirham)
                         return val;
                     break;
                 case "CNY":
-                    YuanCourse = val;
+                    RoubleToYuanCourse = val;
+                    YuanToRoubleCourse = 1 / val;
                     if (curType == CurrencyTypes.Yuan)
                         return val;
                     break;
             }
         }
+        YuanToDyrhamCourse = RoubleToDyrhamCourse / RoubleToYuanCourse;
+        DyrhamToYuanCourse = 1 / YuanToDyrhamCourse;
 
         return 0;
     }

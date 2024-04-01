@@ -44,33 +44,61 @@ public class AccountCrudEndpoints(IApplicationDbContext context, IHttpContextAcc
         var from = await context.Accounts.FindAsync(idFrom);
         var to = await context.Accounts.FindAsync(idTo);
 
-        if (from.Sum < sum | from.CurrencyType == to.CurrencyType)
+        decimal toSum = 0;
+        decimal toMinus = 0;
+
+        switch (from.CurrencyType)
+        {
+            case(CurrencyTypes.Ruble):
+                switch (to.CurrencyType)
+                {
+                    case CurrencyTypes.Dirham:
+                        toSum = sum;
+                        toMinus = sum * CurrencyService.RoubleToDyrhamCourse;
+                        break;
+                    case CurrencyTypes.Yuan:
+                        toSum = sum;
+                        toMinus = sum * CurrencyService.RoubleToYuanCourse;
+                        break;
+                }
+                break;
+            case CurrencyTypes.Yuan:
+                switch (to.CurrencyType)
+                {
+                    case CurrencyTypes.Dirham:
+                        toSum = sum;
+                        toMinus = sum * CurrencyService.YuanToDyrhamCourse;
+                        break;
+                    case CurrencyTypes.Ruble:
+                        toSum = sum;
+                        toMinus = sum * CurrencyService.YuanToRoubleCourse;
+                        break;
+                }
+                break;
+            case CurrencyTypes.Dirham:
+                switch (to.CurrencyType)
+                {
+                    case CurrencyTypes.Ruble:
+                        toSum = sum;
+                        toMinus = sum * CurrencyService.DyrhamToRoubleCourse;
+                        break;
+                    case CurrencyTypes.Yuan:
+                        toSum = sum;
+                        toMinus = sum * CurrencyService.DyrhamToYuanCourse;
+                        break;
+                }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        if (from.Sum < sum || from.CurrencyType == to.CurrencyType)
         {
             return;
         }
-        
-        from.Sum -= sum;
 
-        if (from.CurrencyType == CurrencyTypes.Ruble)
-        {
-            var coef = to.CurrencyType == CurrencyTypes.Dirham
-                ? CurrencyService.DyrhamCourse
-                : CurrencyService.YuanCourse;
-
-            var convertedSum = sum / coef;
-            
-            to.Sum += convertedSum;
-        }
-        else
-        {
-            var coef = to.CurrencyType == CurrencyTypes.Dirham
-                ? CurrencyService.DyrhamCourse
-                : CurrencyService.YuanCourse;
-
-            var convertedSum = sum * coef;
-            
-            to.Sum += convertedSum;
-        }
+        to.Sum += toSum;
+        from.Sum -= toMinus;
 
         
         await context.SaveChangesAsync(cancellationToken);

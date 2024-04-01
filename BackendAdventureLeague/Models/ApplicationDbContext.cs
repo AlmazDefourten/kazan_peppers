@@ -1,6 +1,10 @@
 ﻿using System.Reflection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace BackendAdventureLeague.Models;
 
@@ -21,7 +25,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
         base.OnModelCreating(builder);
     }
 }
-public interface IApplicationDbContext
+public interface IApplicationDbContext : IInfrastructure<IServiceProvider>,
+    IDbContextDependencies,
+    IDbSetCache,
+    IDbContextPoolable
 {
     DbSet<Account> Accounts { get; }
     
@@ -32,4 +39,6 @@ public interface IApplicationDbContext
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     
     int SaveChanges();
+
+    EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
 }

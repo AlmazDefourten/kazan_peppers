@@ -6,15 +6,15 @@ namespace BackendAdventureLeague.Endpoints.Request;
 
 public class RequestsService(IApplicationDbContext context, IHttpContextAccessor contextAccessor, UserManager<ApplicationUser> userManager) : IRequestService
 {
-    public async Task CreateAsync(Models.Request account, CancellationToken cancellationToken = default)
+    public async Task CreateAsync(Models.Request request, CancellationToken cancellationToken = default)
     {
         var claims = contextAccessor.HttpContext?.User;
         var currentUser = await userManager.GetUserAsync(claims!);
+        context.Accounts.Entry(request.AccountFrom).State = EntityState.Unchanged;
+        context.Accounts.Entry(request.AccountTo).State = EntityState.Unchanged;
 
-        var gettedUser = await context.Users.FindAsync(currentUser.Id);
-
-        if (gettedUser != null) account.User = gettedUser;
-        await context.Requests.AddAsync(account, cancellationToken);
+        if (currentUser != null) request.User = currentUser;
+        await context.Requests.AddAsync(request, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 

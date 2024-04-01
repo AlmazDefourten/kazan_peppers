@@ -2,7 +2,7 @@
 
 public interface IRequestService
 {
-    Task CreateAsync(Models.Request account, CancellationToken cancellationToken = default);
+    Task CreateAsync(Models.Request request, CancellationToken cancellationToken = default);
     
     Task<IList<Models.Request>> ListAsync(CancellationToken cancellationToken = default);
     
