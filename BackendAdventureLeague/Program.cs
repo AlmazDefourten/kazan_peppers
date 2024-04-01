@@ -18,7 +18,7 @@ a.GetCurrency(CurrencyTypes.Yuan);
 
 string fullUrl = "https://quote.rbc.ru/tag/currency"; 
 var options = new ChromeOptions();
-options.AddArgument("--headless=new");
+options.AddArgument("--headless");
 var driver = new ChromeDriver(options);
 driver.Navigate().GoToUrl(fullUrl);
 var names = driver.FindElements(By.ClassName("q-item__description")); 
