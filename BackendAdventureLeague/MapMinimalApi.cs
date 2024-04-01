@@ -18,40 +18,17 @@ public static class MapMinimalApi
             .MapDelete(async ([FromServices]IAccountCrudEndpoints service, long id) => await service.DeleteAsync(id), "delete")
             .MapGet(async ([FromServices]IAccountCrudEndpoints service) => await service.ListAsync(), "list")
             .MapPost(async ([FromServices]IAccountCrudEndpoints service, long idFrom, long idTo, decimal sum) => 
-                                await service.TransferAsync(idFrom, idTo, sum), "list");
+                                await service.TransferAsync(idFrom, idTo, sum), "transfer");
         
         app.MapGroup("request")
             .RequireAuthorization()
             .MapGet(async ([FromServices]IRequestService service, long id) => await service.GetAsync(id), "get")
             .MapPost(async ([FromServices]IRequestService service, Request request) => await service.CreateAsync(request), "create")
-            .MapDelete(async ([FromServices]IRequestService service, long id) => await service.DeleteAsync(id), "delete")
-            .MapGet(async ([FromServices]IRequestService service) => await service.ListAsync(), "transfer");
+            .MapDelete(async ([FromServices]IRequestService service, long id) => await service.DeleteAsync(id), "delete");
         
         app.MapGroup("currency")
             .RequireAuthorization()
             .MapGet(() => CurrencyService.YuanCourse.ToString() + " " + CurrencyService.DyrhamCourse.ToString(), "get");
-        
-
-        var summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        app.MapGet("/weatherforecast", () =>
-            {
-                var forecast = Enumerable.Range(1, 5).Select(index =>
-                        new WeatherForecast
-                        (
-                            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                            Random.Shared.Next(-20, 0),
-                            summaries[Random.Shared.Next(summaries.Length)]
-                        ))
-                    .ToArray();
-                return forecast;
-            })
-            .WithName("GetWeatherForecast")
-            .RequireAuthorization()
-            .WithOpenApi();
 
         AuthorizationEndpoints.AddCustomAuthorizationEndpoints(app);
     }
