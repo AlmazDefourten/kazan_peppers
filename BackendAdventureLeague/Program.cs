@@ -1,24 +1,42 @@
+using System.Net;
 using BackendAdventureLeague;
 using BackendAdventureLeague.Endpoints.Account;
 using BackendAdventureLeague.Endpoints.Request;
 using BackendAdventureLeague.Models;
 using BackendAdventureLeague.Services;
+using GigaChatAdapter;
+using HtmlAgilityPack;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Firefox;
 
 var a = new CurrencyService();
 a.GetCurrency(CurrencyTypes.Yuan);
 
+string fullUrl = "https://quote.rbc.ru/tag/currency"; 
+var options = new FirefoxOptions(){ 
+    BinaryLocation = "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" 
+}; 
+ 
+var browser = new FirefoxDriver(options); 
+browser.Navigate().GoToUrl(fullUrl);
+var names = browser.FindElements(By.ClassName("q-item__description")); 
+ 
+for (int i = 0; i < names.Count; i++) 
+{ 
+    Console.WriteLine(names[i].Text); 
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
 builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
-    options.UseNpgsql("Server=localhost;Port=5432;Database=backend;User Id=postgres;Password=123654gg;Include Error Detail=true;");
+    options.UseNpgsql("Server=31.129.111.35;Port=5432;Database=backend;User Id=postgres;Password=123654gg;Include Error Detail=true;");
 });
 
 builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
@@ -80,8 +98,3 @@ var worker = scope.ServiceProvider.GetRequiredService<IBackgroundWorkerService>(
 worker.RequestWorker();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

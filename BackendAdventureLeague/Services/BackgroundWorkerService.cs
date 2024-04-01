@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using BackendAdventureLeague.Models;
+using GigaChatAdapter;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendAdventureLeague.Services;
@@ -111,9 +112,53 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
 
                     dbContext.SaveChanges();
                     
+                    
+                    
                     // Подождите 1 минуту перед следующей итерацией
                     Thread.Sleep(60000); // 60000 миллисекунд = 1 минута
                 }
+        };
+
+        BackgroundWorker.DoWork += async (_, _) =>
+        {
+            string authData =
+                "YjU4MTY4NmYtMGExMC00NTA1LTljNzAtMTg0OTZmM2U5MThiOjhjN2UwMDhlLWFlNGMtNGU2Zi05YmU3LTJkNTA5NDcxZGZjNw==";
+
+            Authorization auth = new Authorization(authData, GigaChatAdapter.Auth.RateScope.GIGACHAT_API_PERS);
+            var authResult = auth.SendRequest().Result;
+
+            if (authResult.AuthorizationSuccess)
+            {
+                Completion completion = new Completion();
+                Console.WriteLine("Напиши последние новости на валютном рынке");
+
+                while (true)
+                {
+                    var prompt = "Напиши последние новости на валютном рынке";
+
+                    await auth.UpdateToken();
+
+                    var result =
+                        await completion.SendRequest(auth.LastResponse.GigaChatAuthorizationResponse?.AccessToken,
+                            prompt);
+
+                    if (result.RequestSuccessed)
+                    {
+                        Console.WriteLine(result.GigaChatCompletionResponse.Choices.LastOrDefault().Message.Content);
+                    }
+                    else
+                    {
+                        Console.WriteLine(result.ErrorTextIfFailed);
+                    }
+                    
+                    Thread.Sleep(6000000); // 6000000 миллисекунд = 100 минут
+                }
+
+            }
+            else
+            {
+                Console.WriteLine(authResult.ErrorTextIfFailed);
+            }
         };
         
         BackgroundWorker.RunWorkerAsync();

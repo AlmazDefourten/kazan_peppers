@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyVersion>1.0.7</AssemblyVersion>
+    <FileVersion>1.0.7</FileVersion>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>reNNN</Authors>
+    <RepositoryUrl>https://github.com/reNNN/GigaChatAdapter</RepositoryUrl>
+    <Description>GigaChat API easily. Unofficial .net library for .NET Core to use GigaChat by Sber in your apps. Example in GitHub project</Description>
+    <PackageTags>GigaChat; .NET Core</PackageTags>
+    <PackageProjectUrl>https://github.com/reNNN/GigaChatAdapter</PackageProjectUrl>
+    <Version>1.0.7</Version>
+    <PackageId>GigaChatAdapter</PackageId>
+    <Product>GigaChatAdapter .NET Core</Product>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <SignAssembly>False</SignAssembly>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
+  </ItemGroup>
+
+</Project>
