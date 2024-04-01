@@ -7,6 +7,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BackendAdventureLeague;
 
+public class TransferDto
+{
+    public long IdFrom { get; set; }
+    
+    public long IdTo { get; set; }
+    
+    public decimal Sum { get; set; }
+}
+
 public static class MapMinimalApi
 {
     public static void DoMap(WebApplication app)
@@ -17,8 +26,8 @@ public static class MapMinimalApi
             .MapPost(async ([FromServices]IAccountCrudEndpoints service, Account account) => await service.CreateAsync(account), "create")
             .MapDelete(async ([FromServices]IAccountCrudEndpoints service, long id) => await service.DeleteAsync(id), "delete")
             .MapGet(async ([FromServices]IAccountCrudEndpoints service) => await service.ListAsync(), "list")
-            .MapPost(async ([FromServices]IAccountCrudEndpoints service, long idFrom, long idTo, decimal sum) => 
-                                await service.TransferAsync(idFrom, idTo, sum), "transfer");
+            .MapPost(async ([FromServices]IAccountCrudEndpoints service, TransferDto dto) => 
+                                await service.TransferAsync(dto.IdFrom, dto.IdTo, dto.Sum), "transfer");
         
         app.MapGroup("request")
             .RequireAuthorization()
