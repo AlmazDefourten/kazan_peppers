@@ -1,7 +1,7 @@
 <template>
-  <div class="h-100 w-100">
-    <div class="pb-5 pt-5 pt-md-8 h-100" ref="tradingviewContainer"></div>
-    <div>
+  <div class="h-100 w-100 d-flex">
+    <div class="pb-5 pt-5 pt-md-8 w-75" ref="tradingviewContainer"></div>
+    <div class="pb-5 pt-5 pt-md-8">
 <!--      ЗАЯВКА-->
       <b-button id="create-order-button" class="m-md-2" v-b-modal.modal-1> Заявка </b-button>
       <b-modal :hide-footer="true" id="modal-1" title="Создание заявки">
