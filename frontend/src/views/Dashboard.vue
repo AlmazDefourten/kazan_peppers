@@ -73,30 +73,22 @@
                       type="mdi"
                       :sub-title="yuanCurrency"
           >
-
           </stats-card>
-
           <stats-card title="Доллар"
                       type="mdi"
                       sub-title="1000"
           >
           </stats-card>
-
-
           <stats-card title="Дирхам"
                       type="gradient-orange"
                       :sub-title="dirhamCurrency"
           >
-
-
           </stats-card>
-
         </div>
-
-
         <base-button @click="interAccountTransfer" size="xl" type="neutral">Перевести деньги</base-button>
       </template>
     </b-modal>
+
     <!--    КУРС ВАЛЮТ-->
     <div class="pb-2 pt-5 pt-md-8 w-75" ref="tradingviewContainer">
       <div class="d-flex pt-2 justify-content-around">
@@ -148,7 +140,7 @@
           <b-button v-b-toggle.collapse-2-modal class="m-1 my-button" v-if="accounts.length > 0" v-model="model.selectedAccountFrom" style="width: 295px"> Счёт:
           {{ model.selectedAccountTo.name }}, {{ getCurrencyTypeString(model.selectedAccountTo.currencyType) }}, {{ model.selectedAccountTo.sum }}
           </b-button>
-          <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-2-modal">
+          <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-2-modal" v-model="isFromCollapseVisible">
             <stats-card :title="data.name"
                         type="gradient-info"
                         :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
@@ -168,7 +160,7 @@
             {{ model.selectedAccountFrom.name }}, {{ getCurrencyTypeString(model.selectedAccountFrom.currencyType) }}, {{ model.selectedAccountFrom.sum }}
           </b-button>
 
-          <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-3-modal">
+          <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-3-modal" v-model="isToCollapseVisible">
             <stats-card :title="data.name"
                         type="gradient-info"
                         :sub-title="data.sum + ' ' + getCurrencyTypeString(data.currencyType)"
@@ -268,6 +260,8 @@
     },
     data() {
       return {
+        isFromCollapseVisible: false,
+        isToCollapseVisible: false,
         model:{
           selectedAccountTo: 0,
           selectedAccountFrom: 0,
@@ -298,10 +292,13 @@
         }
         axios.post(ApiAddress + "/request/create", modelToSend)
           .then(response => {
-            this.$notify({type: "success", icon: "mdi mdi-check-bold", verticalAlign: 'top', horizontalAlign: 'right', message: 'Счет успешно создан'});
+            this.$notify({type: "success", icon: "mdi mdi-check-bold", verticalAlign: 'top', horizontalAlign: 'right', message: 'Заявка успешно создана'});
             this.loadAccounts();
+            this.$bvModal.hide('modal-1');
+            this.isFromCollapseVisible = false; // Свернуть список счетов "С какого счета"
+            this.isToCollapseVisible = false; // Свернуть список счетов "На какой счет"
           }, error => {
-            this.$notify({type: "danger", icon: "mdi mdi-remove", verticalAlign: 'top', horizontalAlign: 'right', message: 'Не удалось создать акаунт'});
+            this.$notify({type: "danger", icon: "mdi mdi-remove", verticalAlign: 'top', horizontalAlign: 'right', message: 'Не удалось создать заявку'});
             console.log(error);
           });
       },
@@ -314,9 +311,13 @@
         }
         axios.post(ApiAddress + "/account/transfer", {idTo: modelToTransfer.idTo, idFrom: modelToTransfer.idFrom, sum: modelToTransfer.sum })
           .then(response => {
-
+            this.$notify({type: "success", icon: "mdi mdi-check-bold", verticalAlign: 'top', horizontalAlign: 'right', message: 'Перевод произведён'});
+            this.$bvModal.hide('modal-4');
+            this.isFromCollapseVisible = false; // Свернуть список счетов "С какого счета"
+            this.isToCollapseVisible = false; // Свернуть список счетов "На какой счет"
           }, error => {
-
+            this.$notify({type: "danger", icon: "mdi mdi-remove", verticalAlign: 'top', horizontalAlign: 'right', message: 'Ошибка перевода'});
+            console.log(error);
           });
       },
 
