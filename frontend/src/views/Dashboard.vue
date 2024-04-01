@@ -81,7 +81,6 @@
                     type="mdi"
                     :sub-title="yuanCurrency"
                     >
-
           <template slot="footer">
             <span class="font-weight-bold">Курс обновляется 1 раз в сутки!</span>
           </template>
@@ -89,7 +88,6 @@
             <img width="35" src="../../public/img/currencies/dirham.png" alt="">
           </template>
         </stats-card>
-
 
         <stats-card title="Доллар США"
                     type="mdi"
@@ -102,7 +100,6 @@
             <img width="30" src="../../public/img/currencies/DOLLAR.png" alt="">
           </template>
         </stats-card>
-
 
         <stats-card title="Дирхам"
                     type="gradient-orange"
@@ -224,6 +221,20 @@
     </div>
 <!--    Список заявок-->
     <div class="pb-2 pt-5 pt-md-8">
+      <b-button id="listRequest" class="m-2 my-button" v-b-modal.modal-5> -><- </b-button>
+      <div class="d-flex pt-2 justify-content-start">
+        <b-modal ref="listRequest" :hide-footer="true" id="modal-5" title="Список заявок">
+          <b-collapse v-for="(data, index) in requestList" :key="index">
+            <template slot="default">
+              <stats-card :title="data.id"
+                          type="mdi"
+                          :sub-title="data.expirationTime"
+              >
+              </stats-card>
+            </template>
+          </b-collapse>
+        </b-modal>
+      </div>
 
     </div>
   </div>
