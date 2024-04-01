@@ -140,7 +140,14 @@
     },
     methods: {
       async createRequest() {
-        axios.post(ApiAddress + "/request/create", this.model)
+        const modelToSend = {
+          accountTo: { id: this.model.selectedAccountTo.id },
+          accountFrom: { id: this.model.selectedAccountFrom.id },
+          amountToBuy: this.model.amountToBuy,
+          costToBy: this.model.costToBy,
+          expirationTime: this.model.selectedDate + "T" + this.model.selectedTime + "Z",
+        }
+        axios.post(ApiAddress + "/request/create", modelToSend)
           .then(response => {
             this.$notify({type: "success", icon: "mdi mdi-check-bold", verticalAlign: 'top', horizontalAlign: 'right', message: 'Счет успешно создан'});
             this.loadAccounts();
