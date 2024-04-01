@@ -31,6 +31,7 @@ public static class MapMinimalApi
         
         app.MapGroup("request")
             .RequireAuthorization()
+            .MapGet(async ([FromServices]IRequestService service) => await service.ListAsync(), "list")
             .MapGet(async ([FromServices]IRequestService service, long id) => await service.GetAsync(id), "get")
             .MapPost(async ([FromServices]IRequestService service, Request request) => await service.CreateAsync(request), "create")
             .MapDelete(async ([FromServices]IRequestService service, long id) => await service.DeleteAsync(id), "delete");
