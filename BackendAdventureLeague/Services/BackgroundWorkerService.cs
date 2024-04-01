@@ -36,6 +36,10 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext) : IBackgro
                             case(CurrencyTypes.Ruble):
                                 switch (to.CurrencyType)
                                 {
+                                    case CurrencyTypes.Ruble:
+                                        toSum = request.AmountToBuy;
+                                        toMinus = request.AmountToBuy;
+                                        break;
                                     case CurrencyTypes.Dirham:
                                         toSum = request.AmountToBuy;
                                         toMinus = request.AmountToBuy * CurrencyService.RoubleToDyrhamCourse;
@@ -49,6 +53,10 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext) : IBackgro
                             case CurrencyTypes.Yuan:
                                 switch (to.CurrencyType)
                                 {
+                                    case CurrencyTypes.Yuan:
+                                        toSum = request.AmountToBuy;
+                                        toMinus = request.AmountToBuy;
+                                        break;
                                     case CurrencyTypes.Dirham:
                                         toSum = request.AmountToBuy;
                                         toMinus = request.AmountToBuy * CurrencyService.YuanToDyrhamCourse;
@@ -62,6 +70,10 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext) : IBackgro
                             case CurrencyTypes.Dirham:
                                 switch (to.CurrencyType)
                                 {
+                                    case CurrencyTypes.Dirham:
+                                        toSum = request.AmountToBuy;
+                                        toMinus = request.AmountToBuy;
+                                        break;
                                     case CurrencyTypes.Ruble:
                                         toSum = request.AmountToBuy;
                                         toMinus = request.AmountToBuy * CurrencyService.DyrhamToRoubleCourse;
@@ -85,8 +97,9 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext) : IBackgro
                         {
                             return;
                         }
-                        to.Sum += toSum;
-                        from.Sum -= toMinus;
+                        
+                        to.Sum += Math.Round(toSum, 2);
+                        from.Sum -= Math.Round(toMinus, 2);
         
                         dbContext.SaveChanges();
                     }

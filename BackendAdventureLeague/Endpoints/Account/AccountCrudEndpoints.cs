@@ -52,6 +52,10 @@ public class AccountCrudEndpoints(IApplicationDbContext context, IHttpContextAcc
             case(CurrencyTypes.Ruble):
                 switch (to.CurrencyType)
                 {
+                    case CurrencyTypes.Ruble:
+                        toSum = sum;
+                        toMinus = sum;
+                        break;
                     case CurrencyTypes.Dirham:
                         toSum = sum;
                         toMinus = sum * CurrencyService.RoubleToDyrhamCourse;
@@ -65,6 +69,10 @@ public class AccountCrudEndpoints(IApplicationDbContext context, IHttpContextAcc
             case CurrencyTypes.Yuan:
                 switch (to.CurrencyType)
                 {
+                    case CurrencyTypes.Yuan:
+                        toSum = sum;
+                        toMinus = sum;
+                        break;
                     case CurrencyTypes.Dirham:
                         toSum = sum;
                         toMinus = sum * CurrencyService.YuanToDyrhamCourse;
@@ -78,6 +86,10 @@ public class AccountCrudEndpoints(IApplicationDbContext context, IHttpContextAcc
             case CurrencyTypes.Dirham:
                 switch (to.CurrencyType)
                 {
+                    case CurrencyTypes.Dirham:
+                        toSum = sum;
+                        toMinus = sum;
+                        break;
                     case CurrencyTypes.Ruble:
                         toSum = sum;
                         toMinus = sum * CurrencyService.DyrhamToRoubleCourse;
@@ -97,9 +109,8 @@ public class AccountCrudEndpoints(IApplicationDbContext context, IHttpContextAcc
             return;
         }
 
-        to.Sum += toSum;
-        from.Sum -= toMinus;
-
+        to.Sum += Math.Round(toSum, 2);
+        from.Sum -= Math.Round(toMinus, 2);
         
         await context.SaveChangesAsync(cancellationToken);
     }
