@@ -6,9 +6,9 @@
       <b-button id="create-order-button" class="m-md-2" v-b-modal.modal-1> Заявка </b-button>
       <b-modal :hide-footer="true" id="modal-1" title="Создание заявки">
         <template slot="default">
-          <label for="accountTo">Выберите счет для покупки валюты:</label>
-          <b-button v-b-toggle.collapse-2-modal class="m-2 my-button" v-if="accounts.length > 0">
-            {{ model.selectedAccountTo.name }}, {{ getCurrencyTypeString(model.selectedAccountTo.currencyType) }}, {{ model.selectedAccountTo.sum }}
+          <label for="accountFrom"class="col-md-12 col-form-label form-control-label">Выберите счет для покупки валюты:</label>
+          <b-button v-b-toggle.collapse-2-modal class="m-1 w-75 my-button" v-if="accounts.length > 0" v-model="model.selectedAccountFrom"> Счёт:
+          {{ model.selectedAccountTo.name }}, {{ getCurrencyTypeString(model.selectedAccountTo.currencyType) }}, {{ model.selectedAccountTo.sum }}
           </b-button>
           <b-collapse v-for="(data, index) in accounts" :key="index" id="collapse-2-modal">
             <stats-card :title="data.name"
@@ -25,8 +25,8 @@
             </stats-card>
           </b-collapse>
 
-          <label for="accountFrom">Выберите счет для оплаты:</label>
-          <b-button v-b-toggle.collapse-3-modal class="m-2 my-button" v-if="accounts.length > 0">
+          <label for="accountFrom"class="col-md-12 col-form-label form-control-label">Выберите счет для оплаты:</label>
+          <b-button v-b-toggle.collapse-3-modal class="m-1 w-75 my-button" v-if="accounts.length > 0" v-model="model.selectedAccountTo"> Счёт:
             {{ model.selectedAccountFrom.name }}, {{ getCurrencyTypeString(model.selectedAccountFrom.currencyType) }}, {{ model.selectedAccountFrom.sum }}
           </b-button>
 
@@ -45,24 +45,33 @@
             </stats-card>
           </b-collapse>
 
-          <label for="amount">Введите сумму, которую хотите получить:</label>
+          <label for="amount" class="col-md-12 col-form-label form-control-label">Введите сумму, которую хотите получить:</label>
           <b-form-group>
             <b-input-group prepend="¤">
-              <b-form-input></b-form-input>
+              <b-form-input v-model="model.amountToBuy"></b-form-input>
             </b-input-group>
           </b-form-group>
 
-          <label for="amount">Введите сумму, за которую хотите получить 1 еденицу валюты:</label>
+          <label for="amount" class="col-md-12 col-form-label form-control-label">Введите сумму, за которую хотите получить 1 еденицу валюты:</label>
           <b-form-group>
             <b-input-group>
-              <b-form-input></b-form-input>
+              <b-form-input v-model="model.costToBy"></b-form-input>
             </b-input-group>
           </b-form-group>
 
-          <label for="date">Выберите дату окончания действия заявки:</label>
-          <input type="date" id="date" v-model="model.selectedDate">
-          <br>
+<!--          <label for="date">Выберите дату и вроемя окончания действия заявки:</label>-->
+          <label for="date" class="col-md-12 col-form-label form-control-label">Выберите дату и время окончания действия заявки:</label>
+          <b-row class="form-group">
+            <b-col md="6">
+              <base-input type="date" id="date" v-model="model.selectedDate"/>
+            </b-col>
+            <b-col md="6" class="text-right">
+              <base-input type="time" id="time" v-model="model.selectedTime"/>
+            </b-col>
+          </b-row>
+
           <base-button @click="createRequest" size="xl" type="neutral">Создать заявку</base-button>
+
         </template>
       </b-modal>
 
@@ -123,7 +132,8 @@
           selectedAccountFrom: 0,
           amountToBuy: 0,
           costToBy: 0,
-          selectedDate: null
+          selectedDate: null,
+          selectedTime: null
         },
         accounts: [0, 1],
       };
