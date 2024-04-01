@@ -10,11 +10,23 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.DevTools.V85.HeadlessExperimental;
 using OpenQA.Selenium.Firefox;
 
 var a = new CurrencyService();
 a.GetCurrency(CurrencyTypes.Yuan);
 
+string fullUrl = "https://quote.rbc.ru/tag/currency"; 
+var options = new ChromeOptions();
+options.AddArgument("--headless=new");
+var driver = new ChromeDriver(options);
+driver.Navigate().GoToUrl(fullUrl);
+var names = driver.FindElements(By.ClassName("q-item__description")); 
+ 
+for (int i = 0; i < names.Count; i++) 
+{ 
+    Console.WriteLine(names[i].Text); 
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
