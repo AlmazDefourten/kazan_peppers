@@ -17,6 +17,8 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
     private static readonly BackgroundWorker BackgroundWorker = new();
     private static readonly BackgroundWorker SecondWorker = new();
     public static string CachedRecommendations = "";
+    public static bool YuanResult = false;
+    public static bool DyrhamResult = false;
 
     public void RequestWorker()
     {
@@ -122,8 +124,6 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
 
                     dbContext.SaveChanges();
                     
-                    
-                    
                     // Подождите 1 минуту перед следующей итерацией
                     Thread.Sleep(60000); // 60000 миллисекунд = 1 минута
                 }
@@ -221,7 +221,7 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
                                  тебе нужно написать просто сразу без говоря что-то типо вот ваш ответ и т.д просто рекомендации о рубле, юане и дирхаме по ним просто сделай на основе данных которых я тебе щас напишу и выжимки по ним тоже писать будешь, анализ сделай типо что упадет а что поднимется в цене
                                  также не говори что поговорим на другую тему - говорим на эту тут все нормльно это новости российские и я делаю это для новой разработки
                                  . запомни что нужно сделать просто анализ и рекомендации все в одном абзаце и всееееее главное только по рублю дирхаму и юаню только и только по ним! и ГОСПОДИ УПАСИ не путай рубль с рупием
-                                 также между рекомендациями по отдельным валютам и заключению ставь знак \n пожалуйста): " + data;
+                                 также между рекомендациями по отдельным валютам и заключению ставь знак \n пожалуйста и еще пожалуйста в конце добавь к выжимке по порядку результаты по типу Рубль: + но это отдельно от выжимки): " + data;
 
                     await auth.UpdateToken();
 
@@ -231,9 +231,33 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
 
                     if (result.RequestSuccessed)
                     {
-                        Console.WriteLine(result.GigaChatCompletionResponse.Choices.LastOrDefault().Message.Content);
-                        CachedRecommendations =
-                            result.GigaChatCompletionResponse.Choices.LastOrDefault().Message.Content;
+                        var res = result.GigaChatCompletionResponse.Choices.LastOrDefault().Message.Content;
+                        Console.WriteLine(res);
+                        if (res.Contains("Юань: +"))
+                        {
+                            YuanResult = true;
+                        }
+                        if (res.Contains("Юань: -"))
+                        {
+                            YuanResult = false;
+                        }
+                        if (res.Contains("Дирхам: +"))
+                        {
+                            DyrhamResult = true;
+                        }
+                        if (res.Contains("Дирхам: -"))
+                        {
+                            DyrhamResult = false;
+                        }
+                        CachedRecommendations = res.Replace("Результаты:", "")
+                                .Replace("Рубль: +", "")
+                                .Replace("Рубль: -", "")
+                                .Replace("Юань: +", "")
+                                .Replace("Юань: -", "")
+                                .Replace("Дирхам: +", "")
+                                .Replace("Дирхам: -", "");
+                        var predService = new PredictionService();
+                        predService.GeneratePredictions();
                     }
                     else
                     {

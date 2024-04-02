@@ -39,7 +39,7 @@ public static class MapMinimalApi
         
         app.MapGroup("currency")
             .RequireAuthorization()
-            .MapGet(() => CurrencyService.RoubleToYuanCourse.ToString() + " " + CurrencyService.RoubleToDyrhamCourse.ToString(), "get");
+            .MapGet(() => CurrencyService.RoubleToYuanCourse.ToString() + " " + CurrencyService.RoubleToDyrhamCourse.ToString() + " " + CurrencyService.RoubleToDollar, "get");
         
         app.MapGroup("recomendation")
             .RequireAuthorization()

@@ -96,19 +96,19 @@
                     :sub-title="yuanCurrency"
                     >
           <template slot="footer">
-            <span class="font-weight-bold">Курс обновляется 1 раз в сутки!</span>
+            <span class="font-weight-bold">Курс обновляется 1 раз в сутки</span>
           </template>
           <template slot="icon" >
-            <img width="35" src="../../public/img/currencies/dirham.png" alt="">
+            <img width="30" src="../../public/img/currencies/YUAN.png" alt="">
           </template>
         </stats-card>
 
         <stats-card title="Доллар США"
                     type="mdi"
-                    sub-title="1000"
+                    :sub-title="dollarCurrency"
         >
           <template slot="footer">
-            <span class="font-weight-bold">Курс обновляется 1 раз в сутки!</span>
+            <span class="font-weight-bold">Курс обновляется 1 раз в сутки</span>
           </template>
           <template slot="icon" >
             <img width="30" src="../../public/img/currencies/DOLLAR.png" alt="">
@@ -120,14 +120,15 @@
                     :sub-title="dirhamCurrency"
                     icon="ni ni-chart-pie-35">
           <template slot="footer">
-            <span class="font-weight-bold">Курс обновляется 1 раз в сутки!</span>
+            <span class="font-weight-bold">Курс обновляется 1 раз в сутки</span>
           </template>
           <template slot="icon" >
-            <img width="30" src="../../public/img/currencies/YUAN.png" alt="">
+            <img width="35" src="../../public/img/currencies/dirham.png" alt="">
           </template>
         </stats-card>
       </div>
       <card class="w-100 mt-4" :show-footer-line="true">
+              <h5>Рекомендации от искусственного интеллекта на основе открытых данных</h5>
               <p class="mb-0" style="font-size: 1em;white-space: pre-line;">{{recomendations}}</p>
       </card>
     </div>
@@ -203,7 +204,7 @@
 <!--      ОТОБРАЖЕНИЕ СЧЕТОВ-->
       <div type="hbox">
         <!-- Если у пользователя есть счета, отображаем первый счет -->
-        <b-button v-b-toggle.collapse-1 class="m-2 my-button" v-if="accounts.length > 0" style="width: 250px">
+        <b-button v-b-toggle.collapse-1 class="m-2 my-button w-75" v-if="accounts.length > 0">
           {{ accounts[0].name }}, {{ getCurrencyTypeString(accounts[0].currencyType) }}, {{ accounts[0].sum }}
         </b-button>
 
@@ -235,7 +236,7 @@
           </template>
         </b-modal>
       </div>
-      <div class="w-100">
+      <div class="w-100 pr-3">
         <b-button v-b-toggle.collapse-7 class="m-2 my-button w-100" v-if="accounts.length > 0">
           Аналитика
         </b-button>
@@ -312,6 +313,7 @@
         accounts: [0, 1],
         yuanCurrency: 0,
         dirhamCurrency: 0,
+        dollarCurrency: 0,
         requestList: [],
         recomendations: "",
         dyrhamPrediction: {
@@ -354,7 +356,7 @@
           idFrom: this.transferModel.selectedFrom.id,
           sum: this.transferModel.sum
         }
-        axios.post(ApiAddress + "/account/transfer", {idTo: modelToTransfer.idTo, idFrom: modelToTransfer.idFrom, sum: modelToTransfer.sum })
+        await axios.post(ApiAddress + "/account/transfer", {idTo: modelToTransfer.idTo, idFrom: modelToTransfer.idFrom, sum: modelToTransfer.sum })
           .then(response => {
             this.$notify({type: "success", icon: "mdi mdi-check-bold", verticalAlign: 'top', horizontalAlign: 'right', message: 'Перевод произведён'});
             this.$bvModal.hide('modal-4');
@@ -364,6 +366,7 @@
             this.$notify({type: "danger", icon: "mdi mdi-remove", verticalAlign: 'top', horizontalAlign: 'right', message: 'Ошибка перевода'});
             console.log(error);
           });
+        await this.loadAccounts();
       },
 
       async loadAccounts() {
@@ -437,8 +440,6 @@
         this.$refs.tradingviewContainer.insertBefore(verticalLine, chartGuiWrapper);
       }, delayInMilliseconds);
 
-
-
         // Теперь у вас есть доступ к виджету через this.tradingViewWidget
     },
     async beforeMount() {
@@ -477,6 +478,7 @@
           const arr = response.data.split(" ");
           this.yuanCurrency = parseFloat(arr[0]).toFixed(2);
           this.dirhamCurrency = parseFloat(arr[1]).toFixed(2);
+          this.dollarCurrency = parseFloat(arr[2]).toFixed(2);
           console.log(response.data);
         }, error => {
           console.log(error);

@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Xml;
+using BackendAdventureLeague.Services;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 
@@ -47,12 +48,15 @@ public class PredictionService : IPredictionService
             Console.WriteLine(value);
         }
 
+        bool isGoingUp = BackgroundWorkerService.YuanResult;
+
         MLContext mlContext = new MLContext();
 
         List<DataPoint> trainingDataView = new List<DataPoint>();
         for (int i = 0; i < valuesArray.Length; i++)
         {
-            trainingDataView.Add(new DataPoint { Value = float.Parse(valuesArray[i].Replace(",", ".")) });
+            trainingDataView.Add(new DataPoint { Value = float.Parse(valuesArray[i].Replace(",", ".")), 
+                IsGoingUp = i + 2 >= valuesArray.Length ? isGoingUp : Convert.ToDecimal(valuesArray[i + 1]) > Convert.ToDecimal(valuesArray[i]) });
         }
 
         IDataView trainingData = mlContext.Data.LoadFromEnumerable(trainingDataView);
@@ -90,17 +94,15 @@ public class PredictionService : IPredictionService
             valuesArray[i] = valueNodes[i].InnerText;
         }
 
-        foreach (string value in valuesArray)
-        {
-            Console.WriteLine(value);
-        }
+        bool isGoingUp = BackgroundWorkerService.DyrhamResult;
 
         MLContext mlContext = new MLContext();
 
         List<DataPoint> trainingDataView = new List<DataPoint>();
         for (int i = 0; i < valuesArray.Length; i++)
         {
-            trainingDataView.Add(new DataPoint { Value = float.Parse(valuesArray[i].Replace(",", ".")) });
+            trainingDataView.Add(new DataPoint { Value = float.Parse(valuesArray[i].Replace(",", ".")), 
+                IsGoingUp = i + 2 >= valuesArray.Length ? isGoingUp : Convert.ToDecimal(valuesArray[i + 1]) > Convert.ToDecimal(valuesArray[i]) });
         }
 
         IDataView trainingData = mlContext.Data.LoadFromEnumerable(trainingDataView);
@@ -124,6 +126,9 @@ public class DataPoint
 {
     [LoadColumn(0)]
     public float Value;
+    
+    [LoadColumn(1)]
+    public bool IsGoingUp;
 }
 
 public class Prediction

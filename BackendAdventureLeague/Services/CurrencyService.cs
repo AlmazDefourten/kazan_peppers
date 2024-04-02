@@ -9,7 +9,9 @@ public class CurrencyService : ICurrencyService
     public static decimal RoubleToDyrhamCourse { get; set; }
     
     public static decimal RoubleToYuanCourse { get; set; }
-    
+
+    public static decimal RoubleToDollar { get; set; }
+
     public static decimal YuanToRoubleCourse { get; set; }
     
     public static decimal YuanToDyrhamCourse { get; set; }
@@ -38,6 +40,9 @@ public class CurrencyService : ICurrencyService
 
             switch (code)
             {
+                case "USD":
+                    RoubleToDollar = val;
+                    break;
                 case "AED":
                     RoubleToDyrhamCourse = val;
                     DyrhamToRoubleCourse = 1 / val;
