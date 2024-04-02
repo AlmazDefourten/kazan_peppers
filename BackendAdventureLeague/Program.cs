@@ -1,38 +1,16 @@
-using System.Net;
 using BackendAdventureLeague;
 using BackendAdventureLeague.Endpoints.Account;
+using BackendAdventureLeague.Endpoints.Prediction;
 using BackendAdventureLeague.Endpoints.Request;
 using BackendAdventureLeague.Models;
 using BackendAdventureLeague.Services;
-using GigaChatAdapter;
-using HtmlAgilityPack;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.DevTools.V85.HeadlessExperimental;
-using OpenQA.Selenium.Firefox;
-using WebDriverManager;
-using WebDriverManager.DriverConfigs.Impl;
 
-var a = new CurrencyService();
-a.GetCurrency(CurrencyTypes.Yuan);
-
-new DriverManager().SetUpDriver(new ChromeConfig());
-
-string fullUrl = "https://quote.rbc.ru/tag/currency"; 
-var options = new ChromeOptions();
-options.AddArgument("--headless");
-options.AddArgument("--no-sandbox");
-options.AddArgument("--disable-dev-shm-usage");
-var driver = new ChromeDriver(options);
-driver.Navigate().GoToUrl(fullUrl);
-var names = driver.FindElements(By.ClassName("q-item__description")); 
- 
-for (int i = 0; i < names.Count; i++) 
-{ 
-    Console.WriteLine(names[i].Text); 
-}
+var currencyServiceInit = new CurrencyService();
+currencyServiceInit.GetCurrency(CurrencyTypes.Yuan);
+var predictionServiceInit = new PredictionService();
+predictionServiceInit.GeneratePredictions();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +50,8 @@ builder.Services.AddSingleton<ICurrencyService, CurrencyService>();
 builder.Services.AddTransient<IAccountCrudEndpoints, AccountCrudEndpoints>();
 builder.Services.AddTransient<IRequestService, RequestsService>();
 
+builder.Services.AddScoped<IPredictionService, PredictionService>();
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -103,3 +83,4 @@ var worker = scope.ServiceProvider.GetRequiredService<IBackgroundWorkerService>(
 worker.RequestWorker();
 
 app.Run();
+

@@ -1,13 +1,22 @@
 ﻿using System.ComponentModel;
+using System.Text;
+using BackendAdventureLeague.Endpoints.Prediction;
 using BackendAdventureLeague.Models;
 using GigaChatAdapter;
+using GigaChatAdapter.Auth;
 using Microsoft.EntityFrameworkCore;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using WebDriverManager;
+using WebDriverManager.DriverConfigs.Impl;
 
 namespace BackendAdventureLeague.Services;
 
-public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyService currencyService) : IBackgroundWorkerService
+public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyService currencyService, IPredictionService predictionService) : IBackgroundWorkerService
 {
     private static readonly BackgroundWorker BackgroundWorker = new();
+    private static readonly BackgroundWorker SecondWorker = new();
+    public static string CachedRecommendations = "";
 
     public void RequestWorker()
     {
@@ -20,6 +29,7 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
                     if (now is { Hour: 11, Minute: 31 })
                     {
                         currencyService.GetCurrency(CurrencyTypes.Dirham);
+                        predictionService.GeneratePredictions();
                     }
                     
                     var requests = dbContext.Requests
@@ -119,49 +129,128 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
                 }
         };
 
-        BackgroundWorker.DoWork += async (_, _) =>
+        SecondWorker.DoWork += async (_, _) =>
         {
             string authData =
                 "YjU4MTY4NmYtMGExMC00NTA1LTljNzAtMTg0OTZmM2U5MThiOjhjN2UwMDhlLWFlNGMtNGU2Zi05YmU3LTJkNTA5NDcxZGZjNw==";
 
-            Authorization auth = new Authorization(authData, GigaChatAdapter.Auth.RateScope.GIGACHAT_API_PERS);
+            Authorization auth = new Authorization(authData, RateScope.GIGACHAT_API_PERS);
             var authResult = auth.SendRequest().Result;
 
             if (authResult.AuthorizationSuccess)
             {
                 Completion completion = new Completion();
                 Console.WriteLine("Напиши последние новости на валютном рынке");
+                
+                new DriverManager().SetUpDriver(new ChromeConfig());
+
+                string fullUrl = "https://quote.rbc.ru/tag/currency"; 
+                var options = new ChromeOptions();
+                options.AddArgument("--headless");
+                options.AddArgument("--no-sandbox");
+                options.AddArgument("--disable-dev-shm-usage");
 
                 while (true)
                 {
-                    var prompt = "Напиши последние новости на валютном рынке";
+                    var driver = new ChromeDriver(options);
+                    driver.Navigate().GoToUrl(fullUrl);
+                    
+                    IJavaScriptExecutor js = driver;
+                    js.ExecuteScript("window.scrollBy(0, document.body.scrollHeight)");
+                    Thread.Sleep(2000);
+
+                    
+                    var names = driver.FindElements(By.ClassName("q-item__description"));
+                    var data = new StringBuilder();
+                    
+                    // на этом месте я чуть не сошел с ума от непробиваемости гигачата и не прыгнул в окно
+                    string[] stopWords = {
+                        "през",
+                        "навал",
+                        "путин",
+                        "смер",
+                        "убий",
+                        "суицид",
+                        "наркотик",
+                        "насилие",
+                        "террор",
+                        "теракт",
+                        "смерть",
+                        "убийств",
+                        "насильствен",
+                        "сексуальн",
+                        "нарушен",
+                        "расизм",
+                        "дискриминац",
+                        "экстремизм",
+                        "алкогол",
+                        "прав",
+                        "коррупц",
+                        "болезн",
+                        "бедств",
+                        "войн",
+                        "оруж",
+                        "пиратств",
+                        "турц",
+                        "угроз",
+                        "санкц",
+                        "рбк",
+                        "полит",
+                        "рубл",
+                        "тур",
+                        "альфа",
+                        "февр"
+                    };
+                    
+                    foreach (var el in names)
+                    {
+                        var skipNews = false;
+                        foreach (string stopWord in stopWords)
+                        {
+                            if (el.Text.ToLower().Contains(stopWord))
+                            {
+                                skipNews = true;
+                                break;
+                            }
+                        }
+                        if (!skipNews)
+                            data.Append(el.Text + ", ");
+                    }
+                    
+                    var prompt = @"Представь что ты делаешь выжимку по некоторых очень нужным новостям по рублю и остальыне по юаню и дирхаму на валютном рынке, 
+                                 тебе нужно написать просто сразу без говоря что-то типо вот ваш ответ и т.д просто рекомендации о рубле, юане и дирхаме по ним просто сделай на основе данных которых я тебе щас напишу и выжимки по ним тоже писать будешь, анализ сделай типо что упадет а что поднимется в цене
+                                 также не говори что поговорим на другую тему - говорим на эту тут все нормльно это новости российские и я делаю это для новой разработки
+                                 . запомни что нужно сделать просто анализ и рекомендации все в одном абзаце и всееееее главное только по рублю дирхаму и юаню только и только по ним! и ГОСПОДИ УПАСИ не путай рубль с рупием
+                                 также между рекомендациями по отдельным валютам и заключению ставь знак \n пожалуйста): " + data;
 
                     await auth.UpdateToken();
 
-                    var result =
-                        await completion.SendRequest(auth.LastResponse.GigaChatAuthorizationResponse?.AccessToken,
+                    var result = await
+                        completion.SendRequest(auth.LastResponse.GigaChatAuthorizationResponse?.AccessToken,
                             prompt);
 
                     if (result.RequestSuccessed)
                     {
                         Console.WriteLine(result.GigaChatCompletionResponse.Choices.LastOrDefault().Message.Content);
+                        CachedRecommendations =
+                            result.GigaChatCompletionResponse.Choices.LastOrDefault().Message.Content;
                     }
                     else
                     {
                         Console.WriteLine(result.ErrorTextIfFailed);
                     }
                     
+                    driver.Quit();
                     Thread.Sleep(6000000); // 6000000 миллисекунд = 100 минут
                 }
 
             }
-            else
-            {
-                Console.WriteLine(authResult.ErrorTextIfFailed);
-            }
+
+            Console.WriteLine(authResult.ErrorTextIfFailed);
         };
         
         BackgroundWorker.RunWorkerAsync();
+        SecondWorker.RunWorkerAsync();
     }
 }
 

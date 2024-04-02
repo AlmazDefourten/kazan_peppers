@@ -1,5 +1,6 @@
 ﻿using BackendAdventureLeague.Endpoints.Account;
 using BackendAdventureLeague.Endpoints.Authorization;
+using BackendAdventureLeague.Endpoints.Prediction;
 using BackendAdventureLeague.Endpoints.Request;
 using BackendAdventureLeague.Models;
 using BackendAdventureLeague.Services;
@@ -39,6 +40,14 @@ public static class MapMinimalApi
         app.MapGroup("currency")
             .RequireAuthorization()
             .MapGet(() => CurrencyService.RoubleToYuanCourse.ToString() + " " + CurrencyService.RoubleToDyrhamCourse.ToString(), "get");
+        
+        app.MapGroup("recomendation")
+            .RequireAuthorization()
+            .MapGet(() => BackgroundWorkerService.CachedRecommendations, "get");
+        
+        app.MapGroup("prediction")
+            .RequireAuthorization()
+            .MapGet(() => PredictionService.PredictionCalculated, "get");
 
         AuthorizationEndpoints.AddCustomAuthorizationEndpoints(app);
     }
