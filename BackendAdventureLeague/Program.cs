@@ -12,9 +12,13 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.DevTools.V85.HeadlessExperimental;
 using OpenQA.Selenium.Firefox;
+using WebDriverManager;
+using WebDriverManager.DriverConfigs.Impl;
 
 var a = new CurrencyService();
 a.GetCurrency(CurrencyTypes.Yuan);
+
+new DriverManager().SetUpDriver(new ChromeConfig());
 
 string fullUrl = "https://quote.rbc.ru/tag/currency"; 
 var options = new ChromeOptions();
