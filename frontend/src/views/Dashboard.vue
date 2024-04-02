@@ -1,5 +1,5 @@
 <template>
-<div>
+<div style="margin-left: 10%">
   <link href="/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
   <b-modal ref="listRequest" :hide-footer="true" id="modal-5" title="Список заявок">
     <div role="tablist" class="accordion">
@@ -88,7 +88,6 @@
         <base-button @click="interAccountTransfer" size="xl" type="neutral">Перевести деньги</base-button>
       </template>
     </b-modal>
-
     <!--    КУРС ВАЛЮТ-->
     <div class="pb-2 pt-5 pt-md-8 w-75" ref="tradingviewContainer">
       <div class="d-flex pt-2 justify-content-around">
@@ -127,8 +126,10 @@
             <img width="30" src="../../public/img/currencies/YUAN.png" alt="">
           </template>
         </stats-card>
-
       </div>
+      <card class="w-100 mt-4" :show-footer-line="true">
+              <p class="mb-0" style="font-size: 1em;white-space: pre-line;">{{recomendations}}</p>
+      </card>
     </div>
     <!--      ЗАЯВКА-->
     <div class="pb-2 pt-5 pt-md-8 pr-0">
@@ -228,12 +229,45 @@
           </stats-card>
         </b-collapse>
 
-
         <b-modal ref="accountModal" :hide-footer="true" id="modal-2" title="Открытие нового счета" >
           <template slot="default">
             <new-account @close="() => { this.$refs.accountModal.hide();  loadAccounts()}"> </new-account>
           </template>
         </b-modal>
+      </div>
+      <div class="w-100">
+        <b-button v-b-toggle.collapse-7 class="m-2 my-button w-100" v-if="accounts.length > 0">
+          Аналитика
+        </b-button>
+        <b-collapse id="collapse-7" style="padding-left: 8px; padding-bottom: -1px">
+          <stats-card title="Юань"
+                      type="gradient-info"
+                      :sub-title="'B: ' + yuanPrediction.best + ' A: ' + yuanPrediction.average + ' W: ' + yuanPrediction.worst"
+                      class="mb-4 w-100"
+                      style="min-width: 250px;"
+          >
+            <template slot="footer">
+              <span :class="((yuanPrediction.average - yuanCurrency) >= 0 ? 'text-success ' : 'text-danger ') + 'mr-2'">
+                {{(((yuanPrediction.average - yuanCurrency) / yuanCurrency) * 100).toFixed(2)}}%
+              </span>
+              <span class="text-nowrap">в среднем на следующий месяц</span>
+            </template>
+          </stats-card>
+          <stats-card title="Дирхам"
+                      type="gradient-info"
+                      :sub-title="'B: ' + dyrhamPrediction.best + ' A: ' + dyrhamPrediction.average + ' W: ' + dyrhamPrediction.worst"
+                      class="mb-4 w-100"
+                      style="min-width: 250px;"
+          >
+            <template slot="footer">
+              <span :class="((dyrhamPrediction.average - dirhamCurrency) >= 0 ? 'text-success ' : 'text-danger ') + 'mr-2'">
+                {{(((dyrhamPrediction.average - dirhamCurrency) / dirhamCurrency) * 100).toFixed(2)}}%
+              </span>
+              <span class="text-nowrap">в среднем на следующий месяц</span>
+            </template>
+          </stats-card>
+
+        </b-collapse>
       </div>
     </div>
 <!--    Список заявок-->
@@ -278,7 +312,18 @@
         accounts: [0, 1],
         yuanCurrency: 0,
         dirhamCurrency: 0,
-        requestList: []
+        requestList: [],
+        recomendations: "",
+        dyrhamPrediction: {
+          best: 0,
+          average: 0,
+          worst: 0
+        },
+        yuanPrediction: {
+          best: 0,
+          average: 0,
+          worst: 0
+        }
       };
     },
     methods: {
@@ -367,11 +412,59 @@
         "enable_publishing": false,
         "allow_symbol_change": true,
         "calendar": false,
+        "watchlist": [
+          "FX_IDC:AEDRUB",
+          "FX_IDC:CNYRUB"
+        ],
         "support_host": "https://www.tradingview.com"
       });
+
       this.$refs.tradingviewContainer.insertBefore(script, this.$refs.tradingviewContainer.firstChild);
+        // Сохраняем ссылку на созданный виджет
+
+      var delayInMilliseconds = 10000; //1 second
+
+      setTimeout(function() {
+        const verticalLine = document.createElement('div');
+        verticalLine.style.width = '200px'; // Толщина линии
+        verticalLine.style.height = '30%';
+        verticalLine.style.zIndex = '9999';
+        verticalLine.id = 'plaxa';
+        verticalLine.class = 'pb-2 pt-5 pt-md-8';
+        verticalLine.style.backgroundColor = 'blue';
+        const chartGuiWrapper = document.querySelector('.chart-gui-wrapper');
+        console.log(chartGuiWrapper);
+        this.$refs.tradingviewContainer.insertBefore(verticalLine, chartGuiWrapper);
+      }, delayInMilliseconds);
+
+
+
+        // Теперь у вас есть доступ к виджету через this.tradingViewWidget
     },
     async beforeMount() {
+      await axios.get(ApiAddress + "/recomendation/get")
+          .then(response => {
+            this.recomendations = response.data;
+            console.log(response.data);
+          }, error => {
+            console.log(error);
+          });
+      await axios.get(ApiAddress + "/prediction/get")
+          .then(response => {
+            const groupsArr = response.data.split("/");
+            const dyrhamValues = groupsArr[0].split(" ");
+            this.dyrhamPrediction.best = dyrhamValues[0];
+            this.dyrhamPrediction.average = dyrhamValues[1];
+            this.dyrhamPrediction.worst = dyrhamValues[2];
+
+            const yuanValues = groupsArr[1].split(" ");
+            this.yuanPrediction.best = yuanValues[0];
+            this.yuanPrediction.average = yuanValues[1];
+            this.yuanPrediction.worst = yuanValues[2];
+            console.log(response.data);
+          }, error => {
+            console.log(error);
+          });
       await axios.get(ApiAddress + "/account/list")
         .then(response => {
           this.accounts = response.data;
