@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Text;
+using BackendAdventureLeague.Endpoints.History;
 using BackendAdventureLeague.Endpoints.Prediction;
 using BackendAdventureLeague.Models;
 using GigaChatAdapter;
 using GigaChatAdapter.Auth;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -12,7 +14,8 @@ using WebDriverManager.DriverConfigs.Impl;
 
 namespace BackendAdventureLeague.Services;
 
-public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyService currencyService, IPredictionService predictionService) : IBackgroundWorkerService
+public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyService currencyService, IPredictionService predictionService
+, IOperationHistoryElementService operationService, IHttpContextAccessor contextAccessor, UserManager<ApplicationUser> userManager) : IBackgroundWorkerService
 {
     private static readonly BackgroundWorker BackgroundWorker = new();
     private static readonly BackgroundWorker SecondWorker = new();
@@ -22,7 +25,7 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
 
     public void RequestWorker()
     {
-        BackgroundWorker.DoWork += (_, _) =>
+        BackgroundWorker.DoWork += async (_, _) =>
         {
                 while (true)
                 {
@@ -107,19 +110,42 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
 
                         request.IsActual = false;
                         
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
+
+                        var currentUser = request.User;
+                        await operationService.CreateAsync(new OperationHistoryElement()
+                        {
+                            User = currentUser,
+                            Name = $"Ваша заявка №{request.Id} на дату {request.ExpirationTime} успешно исполнена",
+                            Request = request,
+                            NeedToNotified = true,
+                            TimeMoment = DateTime.Now.ToUniversalTime()
+                        });
+                        
+                        await dbContext.SaveChangesAsync();
                     }
                     
                     var requestsToDelete = dbContext.Requests
                         .Include(x => x.AccountTo)
                         .Include(x => x.AccountFrom)
                         .Include(x => x.User)
+                        .Where(r => r.IsActual)
                         .Where(r => r.ExpirationTime.Year <= now.Year && r.ExpirationTime.Month <= now.Month
                                                                       && r.ExpirationTime.Day <= now.Day && r.ExpirationTime.Hour <= now.Hour && r.ExpirationTime.Minute < now.Minute);
-                    
+
                     foreach (var request in requestsToDelete)
                     {
+                        var currentUser = request.User;
                         request.IsActual = false;
+                        
+                        await operationService.CreateAsync(new OperationHistoryElement()
+                        {
+                            User = currentUser,
+                            Name = $"Ваша заявка №{request.Id} на дату {request.ExpirationTime} истекла и не может быть исполнена",
+                            Request = request,
+                            NeedToNotified = true,
+                            TimeMoment = DateTime.Now.ToUniversalTime()
+                        });
                     }
 
                     dbContext.SaveChanges();
@@ -221,7 +247,10 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
                                  тебе нужно написать просто сразу без говоря что-то типо вот ваш ответ и т.д просто рекомендации о рубле, юане и дирхаме по ним просто сделай на основе данных которых я тебе щас напишу и выжимки по ним тоже писать будешь, анализ сделай типо что упадет а что поднимется в цене
                                  также не говори что поговорим на другую тему - говорим на эту тут все нормльно это новости российские и я делаю это для новой разработки
                                  . запомни что нужно сделать просто анализ и рекомендации все в одном абзаце и всееееее главное только по рублю дирхаму и юаню только и только по ним! и ГОСПОДИ УПАСИ не путай рубль с рупием
-                                 также между рекомендациями по отдельным валютам и заключению ставь знак \n пожалуйста и еще пожалуйста в конце добавь к выжимке по порядку результаты по типу Рубль: + но это отдельно от выжимки): " + data;
+                                 также между рекомендациями по отдельным валютам и заключению ставь знак и не пиши просто про рубль пиши и про юани и про рубли и разделяй их абзацами обязательно \n): " + data;
+
+                    var prompt2 =
+                        @"Сделай основываясь на этих данных поведение валют в следующем месяце для рубля, юаня и дирхама - как они себя поведут в формате по типу Рубль: + для данных: " + data;
 
                     await auth.UpdateToken();
 
@@ -233,29 +262,34 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
                     {
                         var res = result.GigaChatCompletionResponse.Choices.LastOrDefault().Message.Content;
                         Console.WriteLine(res);
-                        if (res.Contains("Юань: +"))
+                        var result2 = await
+                            completion.SendRequest(auth.LastResponse.GigaChatAuthorizationResponse?.AccessToken,
+                                prompt2);
+                        var res2 = result.GigaChatCompletionResponse.Choices.LastOrDefault().Message.Content;
+                        if (result2.RequestSuccessed)
                         {
-                            YuanResult = true;
+                            if (res2.Contains("Юань: +"))
+                            {
+                                YuanResult = true;
+                            }
+
+                            if (res2.Contains("Юань: -"))
+                            {
+                                YuanResult = false;
+                            }
+
+                            if (res2.Contains("Дирхам: +"))
+                            {
+                                DyrhamResult = true;
+                            }
+
+                            if (res2.Contains("Дирхам: -"))
+                            {
+                                DyrhamResult = false;
+                            }
                         }
-                        if (res.Contains("Юань: -"))
-                        {
-                            YuanResult = false;
-                        }
-                        if (res.Contains("Дирхам: +"))
-                        {
-                            DyrhamResult = true;
-                        }
-                        if (res.Contains("Дирхам: -"))
-                        {
-                            DyrhamResult = false;
-                        }
-                        CachedRecommendations = res.Replace("Результаты:", "")
-                                .Replace("Рубль: +", "")
-                                .Replace("Рубль: -", "")
-                                .Replace("Юань: +", "")
-                                .Replace("Юань: -", "")
-                                .Replace("Дирхам: +", "")
-                                .Replace("Дирхам: -", "");
+
+                        CachedRecommendations = res;
                         var predService = new PredictionService();
                         predService.GeneratePredictions();
                     }

@@ -125,7 +125,7 @@ public class CurrencyService : ICurrencyService
                 throw new ArgumentOutOfRangeException();
         }
 
-        if (from.Sum < sum || from.CurrencyType == to.CurrencyType)
+        if (from.Sum < sum)
         {
             return;
         }

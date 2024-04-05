@@ -1,10 +1,12 @@
-﻿using BackendAdventureLeague.Models;
+﻿using BackendAdventureLeague.Endpoints.History;
+using BackendAdventureLeague.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendAdventureLeague.Endpoints.Request;
 
-public class RequestsService(IApplicationDbContext context, IHttpContextAccessor contextAccessor, UserManager<ApplicationUser> userManager) : IRequestService
+public class RequestsService(IApplicationDbContext context, IHttpContextAccessor contextAccessor, UserManager<ApplicationUser> userManager, 
+    IOperationHistoryElementService operationService) : IRequestService
 {
     public async Task CreateAsync(Models.Request request, CancellationToken cancellationToken = default)
     {
@@ -24,6 +26,8 @@ public class RequestsService(IApplicationDbContext context, IHttpContextAccessor
         var currentUser = await userManager.GetUserAsync(claims!);
 
         return await context.Requests
+            .Include(req => req.AccountFrom)
+            .Include(req => req.AccountTo)
             .Where(ac => currentUser != null && ac.User.Id == currentUser.Id)
             .ToListAsync(cancellationToken: cancellationToken);
     }

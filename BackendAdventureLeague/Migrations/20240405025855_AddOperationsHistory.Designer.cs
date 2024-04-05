@@ -3,6 +3,7 @@ using System;
 using BackendAdventureLeague.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BackendAdventureLeague.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240405025855_AddOperationsHistory")]
+    partial class AddOperationsHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,15 +137,11 @@ namespace BackendAdventureLeague.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<long>("Name")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("NeedToNotified")
                         .HasColumnType("boolean");
-
-                    b.Property<long>("RequestId")
-                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("TimeMoment")
                         .HasColumnType("timestamp with time zone");
@@ -151,8 +150,6 @@ namespace BackendAdventureLeague.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RequestId");
 
                     b.HasIndex("UserId");
 
@@ -342,17 +339,9 @@ namespace BackendAdventureLeague.Migrations
 
             modelBuilder.Entity("BackendAdventureLeague.Models.OperationHistoryElement", b =>
                 {
-                    b.HasOne("BackendAdventureLeague.Models.Request", "Request")
-                        .WithMany()
-                        .HasForeignKey("RequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("BackendAdventureLeague.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
-
-                    b.Navigation("Request");
 
                     b.Navigation("User");
                 });

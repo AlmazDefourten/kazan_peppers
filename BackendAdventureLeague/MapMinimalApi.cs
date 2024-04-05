@@ -1,5 +1,6 @@
 ﻿using BackendAdventureLeague.Endpoints.Account;
 using BackendAdventureLeague.Endpoints.Authorization;
+using BackendAdventureLeague.Endpoints.History;
 using BackendAdventureLeague.Endpoints.Prediction;
 using BackendAdventureLeague.Endpoints.Request;
 using BackendAdventureLeague.Models;
@@ -36,6 +37,14 @@ public static class MapMinimalApi
             .MapGet(async ([FromServices]IRequestService service, long id) => await service.GetAsync(id), "get")
             .MapPost(async ([FromServices]IRequestService service, Request request) => await service.CreateAsync(request), "create")
             .MapDelete(async ([FromServices]IRequestService service, long id) => await service.DeleteAsync(id), "delete");
+
+        app.MapGroup("operations")
+            .RequireAuthorization()
+            .MapGet(async ([FromServices] IOperationHistoryElementService service) => await service.ListOperations(), "list")
+            .MapGet(async ([FromServices] IOperationHistoryElementService service) => await service.ListNeedToNotifyOperations(), "notifylist")
+            .MapPost(
+                async ([FromServices] IOperationHistoryElementService service, OperationHistoryElement element) =>
+                await service.CreateAsync(element), "create");
         
         app.MapGroup("currency")
             .RequireAuthorization()

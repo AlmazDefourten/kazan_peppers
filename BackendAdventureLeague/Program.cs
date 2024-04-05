@@ -1,11 +1,18 @@
 using BackendAdventureLeague;
 using BackendAdventureLeague.Endpoints.Account;
+using BackendAdventureLeague.Endpoints.History;
 using BackendAdventureLeague.Endpoints.Prediction;
 using BackendAdventureLeague.Endpoints.Request;
 using BackendAdventureLeague.Models;
 using BackendAdventureLeague.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
+AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+{
+    Exception ex = (Exception)args.ExceptionObject;
+    Console.WriteLine("Произошло необработанное исключение: " + ex.Message);
+};
 
 var currencyServiceInit = new CurrencyService();
 currencyServiceInit.GetCurrency(CurrencyTypes.Yuan);
@@ -51,6 +58,7 @@ builder.Services.AddTransient<IAccountCrudEndpoints, AccountCrudEndpoints>();
 builder.Services.AddTransient<IRequestService, RequestsService>();
 
 builder.Services.AddScoped<IPredictionService, PredictionService>();
+builder.Services.AddScoped<IOperationHistoryElementService, OperationHistoryElementService>();
 
 builder.Services.AddAuthorization();
 

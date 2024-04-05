@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using BackendAdventureLeague.Endpoints.History;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public DbSet<Account> Accounts => Set<Account>();
     
     public DbSet<Request> Requests => Set<Request>();
+
+    public DbSet<OperationHistoryElement> Operations => Set<OperationHistoryElement>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -35,6 +38,8 @@ public interface IApplicationDbContext : IInfrastructure<IServiceProvider>,
     DbSet<Request> Requests { get; }
     
     DbSet<ApplicationUser> Users { get; }
+    
+    DbSet<OperationHistoryElement> Operations { get; }
     
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     

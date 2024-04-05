@@ -5,20 +5,16 @@
     <div role="tablist" class="accordion">
       <b-card v-for="(data, index) in requestList" :key="index" no-body class="mb-1">
         <b-card-header header-tag="header" role="tab" :v-b-toggle="'accordion-' + index" class="d-flex justify-content-between">
-          <h5 class="mb-0">Заявка №{{ data.id }}</h5>
-          <base-button id="inter-account-transfer" v-b-modal.modal-5 style="background-color: gray; width: 40px; display: flex; justify-content: center; align-items: center;">
-            <i class="fas fa-times"></i>
-          </base-button>
+          <h5 class="mb-0">Заявка №{{ data.id }} Выполняется: {{ data.isActual === true ? 'Да' : 'Нет' }}</h5>
         </b-card-header>
-        <b-collapse :id="'accordion-' + index" visible accordion="my-accordion" role="tabpanel">
           <b-card-body>
             <b-card-text>
-              На сумму: {{ data.amountToBuy }}<br>
-              Цена: {{ data.costToBy }}<br>
-              Счета для оплаты {{ data.accountFrom }}, Счет пополнения {{ data.accountTo }}
+              На сумму: {{ data.amountToBuy }} {{getCurrencyTypeString(data.accountTo.currencyType)}}<br>
+              Цена: {{ data.costToBy + getCurrencyTypeString(data.accountFrom.currencyType) }}<br>
+              Счета для оплаты {{ data.accountFrom.name }}, Счет пополнения {{ data.accountTo.name }}
+              Срок истечения заявки: {{ formatDate(new Date(data.expirationTime)) }}
             </b-card-text>
           </b-card-body>
-        </b-collapse>
       </b-card>
     </div>
   </b-modal>
@@ -329,6 +325,10 @@
       };
     },
     methods: {
+      formatDate(date) {
+        const options = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+        return date.toLocaleDateString('ru-RU', options);
+      },
       async createRequest() {
         const modelToSend = {
           accountTo: { id: this.model.selectedAccountTo.id },
@@ -445,7 +445,7 @@
     async beforeMount() {
       await axios.get(ApiAddress + "/recomendation/get")
           .then(response => {
-            this.recomendations = response.data;
+            this.recomendations = response.data.trimStart();
             console.log(response.data);
           }, error => {
             console.log(error);
@@ -483,6 +483,18 @@
         }, error => {
           console.log(error);
         });
+      let self = this;
+      setInterval(async function() {
+        await axios.get(ApiAddress + "/operations/notifylist")
+            .then(response => {
+              response.data.forEach((item) => {
+                self.$notify({type: "info", timestamp: 50000, showClose: true, icon: "mdi mdi-info", verticalAlign: 'top', horizontalAlign: 'right', message: item.name});
+              });
+              console.log(response.data);
+            }, error => {
+              console.log(error);
+            });
+      }, 60 * 1000);
       this.$forceUpdate();
     }
   };
