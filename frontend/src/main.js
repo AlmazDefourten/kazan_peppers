@@ -25,6 +25,14 @@ import {required, min, confirmed, regex, email} from "vee-validate/dist/rules";
 // plugin setup
 Vue.use(DashboardPlugin);
 
+extend('verify_password', {
+  message: field => `Пароль должен содержать: 1 большую букву, 1 маленькую букву, 1 цифру, и один специальной символ (.)`,
+  validate: value => {
+    var strongRegex = new RegExp("^(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\|,.<>\\/?])(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$");
+    return strongRegex.test(value);
+  }
+});
+
 extend('required', {
   ...required,
   message: 'Это поле обязательно для заполнения'

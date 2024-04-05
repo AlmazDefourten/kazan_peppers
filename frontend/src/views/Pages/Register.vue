@@ -54,7 +54,7 @@
                               placeholder="Пароль"
                               type="password"
                               name="Password"
-                              :rules="{required: true, min: 6 }"
+                              :rules="{required: true, min: 8, verify_password: true }"
                               v-model="model.password">
                   </base-input>
                   <base-input alternative
