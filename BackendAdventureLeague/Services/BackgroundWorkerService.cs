@@ -158,7 +158,7 @@ public class BackgroundWorkerService(IApplicationDbContext dbContext, ICurrencyS
         SecondWorker.DoWork += async (_, _) =>
         {
             string authData =
-                "YjU4MTY4NmYtMGExMC00NTA1LTljNzAtMTg0OTZmM2U5MThiOjhjN2UwMDhlLWFlNGMtNGU2Zi05YmU3LTJkNTA5NDcxZGZjNw==";
+                "YWI1MTU0MWItOWY5MC00NmQ2LWFhODgtZTQ4YjAzYTFmMmJkOjBhYTYzOGUwLTdhNTgtNDAwMC1hYmJmLTc2NDA0ZjlkNmNmMg==";
 
             Authorization auth = new Authorization(authData, RateScope.GIGACHAT_API_PERS);
             var authResult = auth.SendRequest().Result;
